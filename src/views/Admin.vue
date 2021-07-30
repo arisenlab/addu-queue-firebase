@@ -19,6 +19,13 @@
         >
           Run Test Queries
         </button>
+        <button
+          class="btn btn-primary"
+          @click="fastTrack"
+          :disabled="processing"
+        >
+          Fast Track a Number
+        </button>
       </div>
     </div>
 
@@ -35,7 +42,13 @@ import QueueListTable from "../components/QueueListTable.vue";
 export default {
   components: { QueueListTable },
   setup() {
-    const { seedUsers, resetQueue, runTestQueries, getQueueNums } = useAdmin();
+    const {
+      seedUsers,
+      resetQueue,
+      runTestQueries,
+      getQueueNums,
+      fastTrackNum,
+    } = useAdmin();
     const { testQuery, queryStatus } = runTestQueries();
     const { seedUserFn, seedStatus } = seedUsers();
     const queueNumList = getQueueNums();
@@ -146,6 +159,81 @@ export default {
         });
     };
 
+    const fastTrack = () => {
+      const queueNum = parseInt(prompt("Enter a number to fast-track"));
+      let error = null;
+
+      if (isNaN(queueNum)) error = "The number you entered was not valid";
+      if (queueNum > queueNumList.value.length)
+        error =
+          "The number you entered exceeded the number of people in the queue.";
+
+      if (error !== null) {
+        createToast(
+          {
+            title: "Error",
+            description: error,
+          },
+          {
+            type: "danger",
+            position: "top-center",
+          }
+        );
+        return;
+      }
+
+      processing.value = true;
+
+      const queueNumItem = queueNumList.value.find(
+        (num) => num.num === queueNum
+      );
+
+      if (queueNumItem === undefined) {
+        createToast(
+          {
+            title: "Error",
+            description:
+              "Can't find a corresponding queue item with that number.",
+          },
+          {
+            type: "danger",
+            position: "top-center",
+          }
+        );
+        return;
+      }
+
+      fastTrackNum(queueNumItem.id)
+        .then((message) => {
+          createToast(
+            {
+              title: "Success",
+              description: message,
+            },
+            {
+              type: "success",
+              position: "top-center",
+            }
+          );
+          processing.value = false;
+        })
+        .catch((err) => {
+          createToast(
+            {
+              title: "Error",
+              description: err,
+            },
+            {
+              type: "danger",
+              position: "top-center",
+            }
+          );
+          processing.value = false;
+        });
+
+      console.log(queueNumItem);
+    };
+
     watch(
       () => queryStatus.value,
       (newVal) => {
@@ -207,6 +295,7 @@ export default {
       queryStatus,
       processing,
       getStage,
+      fastTrack,
     };
   },
 };

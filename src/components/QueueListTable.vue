@@ -3,8 +3,39 @@
   <div class="row">
     <div class="row my-4">
       <div class="col">
+        <label for="queueBy">Order By: </label>
+        <div id="queueBy" class="row">
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              v-model="queueBy"
+              type="radio"
+              name="queueBy"
+              id="queueByNum"
+              value="num"
+            />
+            <label class="form-check-label" for="queueByNum"
+              >Queue Number</label
+            >
+          </div>
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              v-model="queueBy"
+              type="radio"
+              name="queueBy"
+              id="queueByOrder"
+              value="queueTime"
+            />
+            <label class="form-check-label" for="queueByOrder"
+              >Queue Order</label
+            >
+          </div>
+        </div>
+      </div>
+      <div class="col">
         <label for="ascendingNums">Order Numbers: </label>
-        <div id="ascendingNums">
+        <div id="ascendingNums" class="row">
           <div class="form-check form-check-inline">
             <input
               class="form-check-input"
@@ -73,6 +104,7 @@ export default {
   data: () => ({
     stageFilter: 0,
     ascendingNums: true,
+    queueBy: "num",
   }),
   computed: {
     filteredList() {
@@ -93,16 +125,24 @@ export default {
       const filteredStage = this.queueNumList.filter((num) =>
         filters[this.stageFilter].includes(num.stage)
       );
+      let sortedStage;
+      if (this.queueBy === "queueTime") {
+        // console.log("Filtering by queue Time");
+        sortedStage = filteredStage.sort((first, second) => {
+          // console.log(first, second);
+          return first.queueTime.seconds - second.queueTime.seconds;
+        });
+      } else sortedStage = filteredStage;
 
-      if (this.ascendingNums) return filteredStage;
-      else return filteredStage.reverse();
+      if (this.ascendingNums) return sortedStage;
+      else return sortedStage.reverse();
       // return this.queueNumList.value;
     },
   },
   methods: {
     getStage(stage, timestamps) {
       if (stage === -1) {
-        console.log((timestamps));
+        // console.log(timestamps);
         const stationNames = [
           "post",
           "vaccination",
@@ -112,11 +152,13 @@ export default {
           "registration",
         ];
 
-        for( var x=0; x<stationNames.length; x++ ){
-          console.log( stationNames[x], timestamps[stationNames[x]])
-          if( timestamps[stationNames[x]] != null ){
-            console.log("REJECTED THIS THING")
-            return `Rejected at ${stationNames[x - 1]}`}}
+        for (var x = 0; x < stationNames.length; x++) {
+          // console.log(stationNames[x], timestamps[stationNames[x]]);
+          if (timestamps[stationNames[x]] != null) {
+            // console.log("REJECTED THIS THING");
+            return `Rejected at ${stationNames[x - 1]}`;
+          }
+        }
       }
 
       const actualStage = stage + 1;

@@ -729,9 +729,28 @@ export function useAdmin() {
   const getQueueNums = () => {
     const queueNums = ref([]);
     queueNumCollection.orderBy("num", "asc").onSnapshot((snapshot) => {
-      queueNums.value = snapshot.docs.map((doc) => doc.data());
+      queueNums.value = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
     });
     return queueNums;
+  };
+
+  const fastTrackNum = async (numId) => {
+    try {
+      const firstNum = await queueNumAscending.limit(1).get();
+      const firstQueueTime = firstNum.docs[0].data().queueTime;
+      await firestore
+        .collection("queue")
+        .doc(numId)
+        .update({
+          queueTime: firstQueueTime,
+        });
+      return Promise.resolve("Number moved to the front of the queue!");
+    } catch (err) {
+      return Promise.reject(err);
+    }
   };
 
   return {
@@ -739,5 +758,6 @@ export function useAdmin() {
     resetQueue,
     runTestQueries,
     getQueueNums,
+    fastTrackNum,
   };
 }

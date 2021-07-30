@@ -72,14 +72,20 @@
       class="row row-cols-2 row-cols-md-3 row-cols-lg-5 mt-4"
       style="grid-area: nums"
     >
-      <div class="col" v-for="(queueItem, ind) in waitingQueueList" :key="ind">
+      <div
+        class="col mt-2"
+        v-for="(queueItem, ind) in waitingQueueList"
+        :key="ind"
+      >
+        <MDBBtn
+          :color="ind % 2 ? 'primary' : 'warning'"
+          class="w-100"
+          @click.prevent="selectQueueNumber(ind)"
+        >
+          <h1>{{ queueItem.num }}</h1>
+          <p>Queue No.</p>
+        </MDBBtn>
 
-              <MDBBtn :color="ind % 2 ? 'primary' : 'warning'" class="w-100"
-                  @click.prevent="selectQueueNumber(ind)">
-                <h1>{{ queueItem.num }}</h1>
-                <p>Queue No.</p>
-              </MDBBtn>
-              
         <!-- <MDBCard
           :bg="ind % 2 ? 'primary' : 'warning'"
           :text="ind % 2 ? 'white' : 'black'"
@@ -163,6 +169,7 @@ export default {
     });
 
     const selectQueueNumber = (ind) => {
+      window.scrollTo(0, 0);
       currentQueueNumber.value = queueList.value[ind];
     };
 
@@ -262,11 +269,11 @@ export default {
         });
     };
 
-    const averageTimePerPerson = computed(() => {
-      if (waitTime.value)
-        return new Date(waitTime.value * 1000).toISOString().substr(11, 8);
-      else return "Waiting...";
-    });
+    // const averageTimePerPerson = computed(() => {
+    //   if (waitTime.value)
+    //     return new Date(waitTime.value * 1000).toISOString().substr(11, 8);
+    //   else return "Waiting...";
+    // });
 
     return {
       // stationName,
@@ -279,7 +286,7 @@ export default {
       advanceNum,
       waitTime,
       rejectNum,
-      averageTimePerPerson,
+      // averageTimePerPerson,
       queueList,
       processing,
     };

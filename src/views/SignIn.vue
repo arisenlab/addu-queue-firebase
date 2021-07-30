@@ -32,6 +32,7 @@ import { MDBContainer, MDBInput, MDBRow, MDBBtn } from "mdb-vue-ui-kit";
 import { ref } from "@vue/reactivity";
 import { useAuth } from "../firebase";
 import { useRouter } from "vue-router";
+import { createToast } from "mosha-vue-toastify";
 
 export default {
   components: { MDBContainer, MDBInput, MDBRow, MDBBtn },
@@ -49,7 +50,18 @@ export default {
         .then(() => {
           router.push("/");
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          createToast(
+            {
+              title: "Error Signing In",
+              description: err.message,
+            },
+            {
+              type: "danger",
+              position: "top-center",
+            }
+          );
+        });
     };
 
     return {

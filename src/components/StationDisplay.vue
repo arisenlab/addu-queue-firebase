@@ -3,7 +3,7 @@ THAT ARE CURRENTLY BEING SERVED IN THE STATION -->
 
 <template>
   <div class="row row-cols-10 g-1">
-    <div class="col" v-for="station in serveNums.data" :key="station.station">
+    <div class="col" v-for="station in reversedNums" :key="station.station">
       <div
         class="card c-main"
         :class="{
@@ -13,10 +13,11 @@ THAT ARE CURRENTLY BEING SERVED IN THE STATION -->
       >
         <div class="card-body text-center">
           <div class="card-title">
-            {{ station.station }}
+            {{ station.station.split(" ")[0] }}<br />
+            <h1>{{ station.station.split(" ")[1] }}</h1>
           </div>
           <div class="card-text">
-            <h1>{{ station.currentNum || "Free" }}</h1>
+            <h1 class="display-4">{{ station.currentNum || "Free" }}</h1>
           </div>
         </div>
       </div>
@@ -53,25 +54,6 @@ export default {
       "Station 10": false,
     });
 
-    // Computed
-    const displayNumSplit = computed(() => {
-      if (serveNums.value.data)
-        return [
-          serveNums.value.data.slice(0, 5).map((val) => {
-            return {
-              ...val,
-              new: newNums.value[val.station],
-            };
-          }),
-          serveNums.value.data.slice(5, 10).map((val) => {
-            return {
-              ...val,
-              new: newNums.value[val.station],
-            };
-          }),
-        ];
-    });
-
     // Watcher to see if there's new values in the array
     watch(serveNums, (newValue) => {
       console.log("newval", newValue);
@@ -96,7 +78,12 @@ export default {
       alert.play();
     }
 
-    return { serveNums, displayNumSplit, playAlert, newNums };
+    const reversedNums = computed(() => {
+      if (serveNums.value.data) return serveNums.value.data.reverse();
+      return [];
+    });
+
+    return { serveNums, playAlert, newNums, reversedNums };
   },
 };
 </script>

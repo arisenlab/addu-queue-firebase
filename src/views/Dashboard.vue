@@ -1,5 +1,6 @@
 <template>
   <div class="dashboard-layout container">
+    <!-- {{ averageTimePerStation }} -->
     <MDBCard
       style="grid-area: numVax"
       bg="primary"
@@ -45,10 +46,14 @@
         </MDBCardText>
       </MDBCardBody>
     </MDBCard>
-    <MDBCard style="grid-area: latestIssued" bg="info" class="text-center">
+    <MDBCard
+      style="grid-area: latestIssued"
+      bg="info"
+      class="text-center text-white"
+    >
       <MDBCardBody>
         <MDBCardTitle>Latest Number Issued</MDBCardTitle>
-        <MDBCardText class="display-2">{{ queueNumList.length }}</MDBCardText>
+        <MDBCardText class="display-2 ">{{ queueNumList.length }}</MDBCardText>
       </MDBCardBody>
     </MDBCard>
 
@@ -59,7 +64,10 @@
       </MDBCardBody>
     </MDBCard>
 
-    <div class="bg-primary lead text-white rounded text-center p-2" style="grid-area: numLabel">
+    <div
+      class="bg-primary lead text-white rounded text-center p-2"
+      style="grid-area: numLabel"
+    >
       Number of People in Stations
     </div>
 
@@ -72,35 +80,36 @@
         class="text-center"
       >
         <MDBCardBody>
-          <MDBCardTitle class="lead"
-            >{{ queue.station }}</MDBCardTitle
-          >
+          <MDBCardTitle class="lead">{{ queue.station }}</MDBCardTitle>
           <MDBCardText class="display-3">{{ queue.count }}</MDBCardText>
         </MDBCardBody>
       </MDBCard>
     </div>
-<!-- 
-    <div class="bg-primary lead text-white rounded text-center p-2" style="grid-area: waitLabel">
-      Number of People in Stations
+
+    <div
+      class="bg-primary lead text-white rounded text-center p-2"
+      style="grid-area: waitLabel"
+    >
+      Waiting Time in Stations
     </div>
 
     <div class="num-person-display" style="grid-area: waitTime">
       <MDBCard
-        v-for="(queue, ind) in queueInStations"
+        v-for="(queue, ind) in averageTimePerStation"
         :key="queue.station"
         :bg="ind % 2 ? 'primary' : 'warning'"
         :text="ind % 2 ? 'white' : 'black'"
         class="text-center"
       >
         <MDBCardBody>
-          <MDBCardTitle class="lead"
-            >{{ queue.station }}</MDBCardTitle
-          >
-          <MDBCardText class="display-3">TODO WAITTIME</MDBCardText>
+          <MDBCardTitle class="lead">{{ queue.station }}</MDBCardTitle>
+          <MDBCardText class="display-6">
+            {{ queue.time }}<br />
+            <small class="lead">h:m:s</small>
+          </MDBCardText>
         </MDBCardBody>
       </MDBCard>
-    </div> -->
-
+    </div>
   </div>
 </template>
 
@@ -150,12 +159,63 @@ export default {
           .map((queueNum) => {
             const enterTime = queueNum.timestamps.issue;
             const exitTime = queueNum.timestamps.post;
-            console.log(queueNum, "Enter: ", enterTime, "Exit:", exitTime);
+            // console.log(queueNum, "Enter: ", enterTime, "Exit:", exitTime);
             // Calculate the time in seconds
             return exitTime.seconds - enterTime.seconds;
           })
           .reduce((a, b) => a + b, 0) / finished.length; // Add up the seconds then average
       return new Date(seconds * 1000).toISOString().substr(11, 8);
+    });
+
+    const averageTimePerStation = computed(() => {
+      const conditions = [
+        "issue",
+        "registration",
+        "vitals",
+        "counseling",
+        "screening",
+        "vaccination",
+        "post",
+      ];
+
+      const timestamps = queueNumList.value.map(
+        (queueNum) => queueNum.timestamps
+      );
+      console.log("Timestamps", timestamps);
+
+      const avgTimes = [];
+
+      for (let x = 1; x < conditions.length; x++) {
+        // console.log(conditions[x - 1], conditions[x]);
+        const curr = conditions[x];
+        const prev = conditions[x - 1];
+
+        const validTimestamps = timestamps.filter((timestampArr) => {
+          return timestampArr[curr] !== null && timestampArr[prev] !== null;
+        });
+
+        if (validTimestamps.length === 0)
+          return {
+            time: "Waiting...",
+            station: curr,
+          };
+
+        const seconds =
+          validTimestamps.reduce((totalSeconds, timestamp) => {
+            const difference =
+              timestamp[curr].seconds - timestamp[prev].seconds;
+            return (totalSeconds += difference);
+          }, 0) / validTimestamps.length;
+
+        const time = new Date(seconds * 1000).toISOString().substr(11, 8);
+
+        avgTimes.push({
+          time,
+          station: curr,
+        });
+      }
+
+      return avgTimes;
     });
 
     const numRejected = computed(() => {
@@ -176,7 +236,7 @@ export default {
         return {
           station: station.charAt(0).toUpperCase() + station.slice(1), // Capitalize
           count: queueNumList.value.filter((queueNum) => {
-            console.log(queueNum.stage);
+            // console.log(queueNum.stage);
             if (queueNum.stage === ind * 2 || queueNum.stage == ind * 2 + 1)
               return queueNum;
           }).length,
@@ -185,9 +245,7 @@ export default {
     });
 
     const numVaccinated = computed(() => {
-      return queueNumList.value.filter(
-        (queueNum) => queueNum.stage > 8
-      );
+      return queueNumList.value.filter((queueNum) => queueNum.stage > 8);
     });
 
     const averageTimeInRegistration = computed(() => {
@@ -220,6 +278,7 @@ export default {
       queueInStations,
       numVaccinated,
       averageTimeInRegistration,
+      averageTimePerStation,
     };
   },
 };
