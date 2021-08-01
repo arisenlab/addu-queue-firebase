@@ -38,12 +38,8 @@
       class="text-center"
     >
       <MDBCardBody>
-        <MDBCardTitle>Average Time In Registration</MDBCardTitle>
-        <MDBCardText class="display-2"
-          >{{
-            averageTimeInRegistration ? averageTimeInRegistration : `Waiting...`
-          }}
-        </MDBCardText>
+        <MDBCardTitle>Vaccination Start Time</MDBCardTitle>
+        <MDBCardText class="display-2">{{ startTime }} </MDBCardText>
       </MDBCardBody>
     </MDBCard>
     <MDBCard
@@ -181,7 +177,7 @@ export default {
       const timestamps = queueNumList.value.map(
         (queueNum) => queueNum.timestamps
       );
-      console.log("Timestamps", timestamps);
+      // console.log("Timestamps", timestamps);
 
       const avgTimes = [];
 
@@ -270,6 +266,20 @@ export default {
       return new Date(seconds * 1000).toISOString().substr(11, 8);
     });
 
+    const startTime = computed(() => {
+      if (queueNumList.value.length == 0) return "Waiting...";
+      // else return "THere is a start";
+
+      const sortList = queueNumList.value.sort((a, b) => {
+        return a.queueTime.seconds - b.queueTime.seconds;
+      });
+
+      return sortList[0].queueTime
+        .toDate()
+        .toLocaleString("en-us")
+        .split(", ")[1];
+    });
+
     return {
       queueNumList,
       peopleInQueue,
@@ -279,6 +289,7 @@ export default {
       numVaccinated,
       averageTimeInRegistration,
       averageTimePerStation,
+      startTime,
     };
   },
 };
