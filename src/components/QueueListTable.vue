@@ -84,14 +84,14 @@
         <tr>
           <th>Queue Number</th>
           <th>Current Stage</th>
-          <!-- <th>Actions</th> -->
+          <th>Special Case?</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="queueNum in filteredList" :key="queueNum.num">
           <td>{{ queueNum.num }}</td>
           <td>{{ getStage(queueNum.stage, queueNum.timestamps) }}</td>
-          <td></td>
+          <td>{{ queueNum.specialCase ? "Yes" : "" }}</td>
         </tr>
       </tbody>
     </table>

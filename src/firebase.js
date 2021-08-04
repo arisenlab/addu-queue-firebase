@@ -150,6 +150,7 @@ export function useQueue() {
           num: newQueueNo,
           queueTime: firebase.firestore.FieldValue.serverTimestamp(),
           stage: 0,
+          specialCase: false,
           timestamps: {
             issue: firebase.firestore.FieldValue.serverTimestamp(),
             registration: null,
@@ -184,11 +185,35 @@ export function useQueue() {
       var nextQueueNum;
 
       await firestore.runTransaction(async (transaction) => {
+        let query;
+
+        const perms = await permissions();
+
+        // console.log(perms);
+        // const timestamp = await firebase.firestore.Firestor
+
+        if (perms.specialCases.includes(auth.currentUser.uid)) {
+          console.log("hello world");
+          query = await queueNumAscending
+            .where("stage", "==", stage)
+            .where("specialCase", "==", true)
+            .limit(1)
+            .get();
+          if (query.empty)
+            query = await queueNumAscending
+              .where("stage", "==", stage)
+              .where("specialCase", "==", false)
+              .limit(1)
+              .get();
+        } else {
+          query = await queueNumAscending
+            .where("stage", "==", stage)
+            .where("specialCase", "==", false)
+            .limit(1)
+            .get();
+        }
+
         // Get the latest num with the correct stage
-        let query = await queueNumAscending
-          .where("stage", "==", stage)
-          .limit(1)
-          .get();
 
         // If query is empty AKA No one w/ the stage is found,
         // Throw an error
@@ -337,6 +362,7 @@ export function useQueue() {
             .update({
               queueTime: firebase.firestore.FieldValue.serverTimestamp(),
               stage: decrement,
+              specialCase: true,
             })
             .then(() => {
               resolve("Queue number has been set back");
@@ -574,6 +600,8 @@ export function useAdmin() {
           });
         }
 
+        const specialCases = [];
+
         for (const station of stations) {
           uids = [];
           for (let x = 1; x <= 10; x++) {
@@ -599,6 +627,15 @@ export function useAdmin() {
             }
 
             uids.push(userCred.user.uid);
+
+            if (x == 10) {
+              specialCases.push(userCred.user.uid);
+              seedStatus.value = {
+                status: "success",
+                message: "10th station found, adding to special cases",
+              };
+            }
+
             batch.set(
               firestore.collection("stationDetails").doc(userCred.user.uid),
               {
@@ -608,10 +645,16 @@ export function useAdmin() {
               }
             );
           }
+
           batch.set(firestore.collection("permissions").doc(station), {
             ids: uids,
           });
         }
+
+        batch.set(firestore.collection("permissions").doc("specialCases"), {
+          ids: specialCases,
+        });
+
         await batch.commit();
         return Promise.resolve("Done seeding!");
       } catch (err) {
@@ -746,6 +789,7 @@ export function useAdmin() {
         .doc(numId)
         .update({
           queueTime: firstQueueTime,
+          specialCase: true,
         });
       return Promise.resolve("Number moved to the front of the queue!");
     } catch (err) {

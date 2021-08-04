@@ -88,15 +88,15 @@ const routes = [
       adminRequired: true,
     },
   },
-  // {
-  //   path: "/dashboard",
-  //   name: "Dashboard",
-  //   component: Dashboard,
-  //   meta: {
-  //     authRequired: true,
-  //     adminRequired: true,
-  //   },
-  // },
+  {
+    path: "/dashboard",
+    name: "Dashboard",
+    component: Dashboard,
+    meta: {
+      authRequired: true,
+      adminRequired: true,
+    },
+  },
 ];
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
@@ -110,6 +110,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   permissions().then((userPermissions) => {
+    // console.log(userPermissions);
     if (to.meta.authRequired) {
       if (isLogin.value)
         if (to.meta.adminRequired) {
