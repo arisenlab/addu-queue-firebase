@@ -1,41 +1,59 @@
 <template>
-  <MDBContainer>
-    <MDBRow tag="form" class="g-3">
-      <MDBInput
-        inputGroup
-        :formOutline="false"
-        v-model="form.email"
-        aria-describedby="basic-addon1"
-        aria-label="Username"
-        placeholder="Username"
-      >
-      </MDBInput>
-      <MDBInput
-        inputGroup
-        :formOutline="false"
-        v-model="form.password"
-        type="password"
-        aria-describedby="basic-addon2"
-        aria-label="Password"
-        placeholder="Password"
-      >
-      </MDBInput>
-      <MDBBtn color="primary" class="mt-3" @click="signIn">
-        Login
-      </MDBBtn>
-    </MDBRow>
-  </MDBContainer>
+  <div class="form-demo">
+    <div class="p-d-flex p-jc-center">
+      <div class="card">
+        <div class="logo">
+          <div>
+            <img src="../../public/addu-seal.png" height="60" />
+            <img src="../../public/nav_logo.png" height="60" />
+          </div>
+          <h2>AdDU Vaccination Queue System</h2>
+        </div>
+
+        <form class="p-fluid">
+          <div class="p-field">
+            <label for="email">Email</label>
+            <div class="p-float-label p-input-icon-right">
+              <i class="pi pi-envelope" />
+              <InputText
+                id="email"
+                type="text"
+                placeholder="Enter your email address"
+                v-model="form.email"
+              />
+            </div>
+          </div>
+          <div class="p-field">
+            <label for="email">Password</label>
+            <div class="p-float-label p-input-icon-right">
+              <i class="pi pi-lock" />
+              <InputText
+                type="password"
+                placeholder="Enter your Password"
+                v-model="form.password"
+              />
+            </div>
+          </div>
+          <Button type="button" label="Login" class="p-mt-2" @click="signIn" />
+        </form>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import { MDBContainer, MDBInput, MDBRow, MDBBtn } from "mdb-vue-ui-kit";
+//import { MDBContainer, MDBInput, MDBRow, MDBBtn } from "mdb-vue-ui-kit";
 import { ref } from "@vue/reactivity";
 import { useAuth } from "../firebase";
 import { useRouter } from "vue-router";
 import { createToast } from "mosha-vue-toastify";
+//import Card from "primevue/card";
+import InputText from "primevue/inputtext";
+import Button from "primevue/button";
 
 export default {
-  components: { MDBContainer, MDBInput, MDBRow, MDBBtn },
+  //components: { MDBContainer, MDBInput, MDBRow, MDBBtn },
+  components: { InputText, Button },
   setup() {
     const { signInWithForm } = useAuth();
     const router = useRouter();
@@ -72,4 +90,25 @@ export default {
 };
 </script>
 
-<style></style>
+<style lang="scss" scoped>
+.form-demo {
+  margin-top: -20px;
+  margin: auto;
+  border-radius: 20px;
+  .logo {
+    text-align: center;
+  }
+  .card {
+    padding: 20px;
+    min-width: 450px;
+
+    form {
+      margin-top: 2rem;
+    }
+
+    .p-field {
+      margin-bottom: 1.5rem;
+    }
+  }
+}
+</style>

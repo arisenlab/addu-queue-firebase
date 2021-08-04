@@ -92,15 +92,18 @@
       </MDBCollapse>
     </MDBNavbar>
 
+    <Menubar :model="routes">
+      <template #start> Before </template>
+      <template #end> <Button label="Submit" /> </template>
+    </Menubar>
+
     <div class="flex-grow-1">
       <router-view v-bind="$attrs" />
     </div>
 
-    <div
-      class="d-flex flex-column align-items-center justify-content-center mt-4"
-    >
-      <h5 style="transform: translateY(25px)">Powered by</h5>
-      <img src="/horizontal-logo.png" height="100" />
+    <div style="text-align: center">
+      <h4 style="margin-bottom: -15px">Powered by</h4>
+      <img src="/horizontal-logo.png" height="80" />
     </div>
   </div>
 </template>
@@ -117,8 +120,11 @@ import {
   MDBDropdownToggle,
   MDBDropdown,
 } from "mdb-vue-ui-kit";
+import Menubar from "primevue/menubar";
+import Button from "primevue/button";
 import { ref } from "vue";
 import { useAuth } from "./firebase";
+import { routes } from "./router/routes";
 
 export default {
   data: () => ({
@@ -130,6 +136,7 @@ export default {
       Vaccination: "vaccination",
       "Post Vaccination": "post",
     },
+    routes: routes,
   }),
   components: {
     MDBNavbar,
@@ -141,6 +148,14 @@ export default {
     MDBDropdownMenu,
     MDBDropdownToggle,
     MDBDropdown,
+    Menubar,
+    Button,
+  },
+  computed: {
+    inLoginPage() {
+      console.log(this.$route.path !== "/signin");
+      return this.$route.path !== "/signin";
+    },
   },
   setup() {
     const { isLogin } = useAuth();
