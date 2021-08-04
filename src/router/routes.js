@@ -3,18 +3,27 @@ import { useAuthServer } from "../firebase";
 import { adminUids } from "../secrets";
 
 import Issue from "../views/Issue.vue";
-//import Station from "../views/Station.vue";
-//import Display from "../views/Display.vue";
+import Station from "../views/Station.vue";
+import Display from "../views/Display.vue";
 import SignIn from "../views/SignIn.vue";
 import SignOut from "../views/SignOut.vue";
 import Admin from "../views/Admin.vue";
-//import Monitoring from "../views/Monitoring.vue";
-//import Dashboard from "../views/Dashboard.vue";
-//import QueueOverview from "../views/QueueOverview.vue";
+import Monitoring from "../views/Monitoring.vue";
+import Dashboard from "../views/Dashboard.vue";
+import QueueOverview from "../views/QueueOverview.vue";
 
 const { isLogin, user, permissions } = useAuthServer();
 
 export const routes = [
+    {
+        path: "/",
+        name: "Home",
+        component: Dashboard,
+        props: {
+            authRequired: true,
+            adminRequired: true,
+        },
+    },
     {
         path: "/issue",
         name: "Issue",
@@ -23,98 +32,15 @@ export const routes = [
             authRequired: true,
             issueRequired: true,
         },
-        /* to: "/issue",
-        label: "Issue",
-        icon: "pi pi-check-square", */
     },
     {
-        path: "/signin",
-        name: "Sign In",
-        component: SignIn,
-        /* to: "/signin",
-        label: "Sign In",
-        icon: "pi pi-sign-in", */
-    },
-    {
-        path: "/signout",
-        name: "Sign Out",
-        component: SignOut,
-        meta: {
-            authRequired: true,
-        } /* 
-        to: "/signout",
-        label: "Sign Out",
-        icon: "pi pi-sign-out", */,
-    },
-    {
-        path: "/admin",
-        name: "Admin",
-        component: Admin,
-        props: {
-            authRequired: true,
-            adminRequired: true,
-        } /* 
-        label: "Admin",
-        icon: "pi pi-id-card",
-        children: [
-            {
-                path: "/dashboard",
-                name: "Dashboard",
-                component: Dashboard,
-            },
-        ],
-        items: [
-            {
-                label: "Dashboard",
-                icon: "pi pi-chart-bar",
-                to: "/",
-            },
-            {
-                label: "Controls",
-                icon: "pi pi-sliders-h",
-                to: "/admin",
-            },
-        ], */,
-    },
-    /* {
-        path: "/station",
+        path: "/station/:station",
         name: "Station Control",
+        component: Station,
         meta: {
             authRequired: true,
             stationRequired: true,
         },
-        children: [
-            {
-                path: "/:station",
-                name: "Station Control",
-                component: Station,
-            },
-            {
-                path: "/:display",
-                name: "Station Display",
-                component: Display,
-            },
-        ],
-    }, */
-    /* {
-        path: "/station",
-        name: "Station Control",
-        meta: {
-            authRequired: true,
-            stationRequired: true,
-        },
-        children: [
-            {
-                path: "/:station",
-                name: "Station Control",
-                component: Station,
-            },
-            {
-                path: "/:display",
-                name: "Station Display",
-                component: Display,
-            },
-        ],
     },
     {
         path: "/monitoring/overview",
@@ -135,9 +61,22 @@ export const routes = [
         },
     },
     {
+        path: "/display/:station",
+        name: "Station Display",
+        component: Display,
+    },
+    {
         path: "/signin",
         name: "Sign In",
         component: SignIn,
+    },
+    {
+        path: "/signout",
+        name: "Sign Out",
+        component: SignOut,
+        meta: {
+            authRequired: true,
+        },
     },
     {
         path: "/admin",
@@ -147,7 +86,7 @@ export const routes = [
             authRequired: true,
             adminRequired: true,
         },
-    }, */
+    },
     // {
     //   path: "/dashboard",
     //   name: "Dashboard",

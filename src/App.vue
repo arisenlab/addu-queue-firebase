@@ -1,190 +1,148 @@
 <template>
-  <div class="d-flex flex-column" style="min-height: 100vh">
-    <MDBNavbar id="main-nav" container expand="lg" dark bg="primary">
-      <div class="d-flex">
-        <MDBNavbarBrand href="#">
-          <router-link to="/"
-            ><img src="../public/addu-seal.png" height="100" />
-          </router-link>
-        </MDBNavbarBrand>
-        <MDBNavbarBrand href="#">
-          <router-link to="/">
-            <img src="../public/nav_logo.png" height="80" />
-          </router-link>
-        </MDBNavbarBrand>
-      </div>
+    <div
+        style="min-height: 100vh;"
+        :class="{ login: $route.name === '/signin' }"
+    >
+        <Menubar v-show="isLogin" :model="routes">
+            <template #start>
+                <img src="../public/addu-seal.png" height="60" class="p-mr-2" />
+                <img src="../public/nav_logo.png" height="50" class="p-mr-2" />
+            </template>
+            <template #end>
+                <Button @click="$router.push('/signout')" label="Signout" />
+            </template>
+        </Menubar>
 
-      <MDBNavbarToggler
-        @click="collapse1 = !collapse1"
-        target="#navbarSupportedContent"
-      ></MDBNavbarToggler>
-      <MDBCollapse v-model="collapse1" id="navbarSupportedContent">
-        <MDBNavbarNav class="mb-2 mb-lg-0">
-          <MDBNavbarItem to="#">
-            <router-link to="/issue" class="nav-link">Issue Num</router-link>
-          </MDBNavbarItem>
-          <MDBNavbarItem to="#">
-            <router-link to="/station/registration" class="nav-link"
-              >Registration Controls</router-link
-            >
-          </MDBNavbarItem>
-          <MDBNavbarItem to="#">
-            <router-link to="/display/registration" class="nav-link"
-              >Display Registration</router-link
-            >
-          </MDBNavbarItem>
-          <MDBNavbarItem>
-            <MDBDropdown class="nav-item" v-model="adminDropdown">
-              <MDBDropdownToggle
-                tag="a"
-                class="nav-link mt-2"
-                @click="adminDropdown = !adminDropdown"
-                >Monitoring</MDBDropdownToggle
-              >
-              <MDBDropdownMenu aria-labelledby="dropdownMenuButton">
-                <li href="#">
-                  <router-link to="/monitoring/overview" class="dropdown-item"
-                    >Queue List Overview</router-link
-                  >
-                </li>
-                <li v-for="(station, key) in stations" :key="station" href="#">
-                  <router-link
-                    :to="`/monitoring/${station}`"
-                    class="dropdown-item"
-                    >{{ key }}</router-link
-                  >
-                </li>
-              </MDBDropdownMenu>
-            </MDBDropdown>
-          </MDBNavbarItem>
+        <div class="flex-grow-1">
+            <router-view v-bind="$attrs" />
+        </div>
 
-          <MDBNavbarItem>
-            <MDBDropdown class="nav-item" v-model="displayDropdown">
-              <MDBDropdownToggle
-                tag="a"
-                class="nav-link mt-2"
-                @click="displayDropdown = !displayDropdown"
-                >Admin</MDBDropdownToggle
-              >
-              <MDBDropdownMenu aria-labelledby="dropdownMenuButton">
-                <li href="#">
-                  <router-link to="/admin" class="dropdown-item"
-                    >Admin Controls</router-link
-                  >
-                </li>
-                <li href="#">
-                  <router-link to="/dashboard" class="dropdown-item"
-                    >Admin Dashboard</router-link
-                  >
-                </li>
-              </MDBDropdownMenu>
-            </MDBDropdown>
-          </MDBNavbarItem>
-          <MDBNavbarItem v-if="!isLogin" to="#">
-            <router-link :to="`/signin`" class="nav-link">Sign In</router-link>
-          </MDBNavbarItem>
-          <MDBNavbarItem v-else to="#">
-            <router-link :to="`/signout`" class="nav-link"
-              >Sign Out</router-link
-            >
-          </MDBNavbarItem>
-        </MDBNavbarNav>
-      </MDBCollapse>
-    </MDBNavbar>
-
-    <Menubar :model="routes">
-      <template #start> Before </template>
-      <template #end> <Button label="Submit" /> </template>
-    </Menubar>
-
-    <div class="flex-grow-1">
-      <router-view v-bind="$attrs" />
+        <div style="text-align: center">
+            <h4 style="margin-bottom: -15px">Powered by</h4>
+            <img src="/horizontal-logo.png" height="80" />
+        </div>
     </div>
-
-    <div style="text-align: center">
-      <h4 style="margin-bottom: -15px">Powered by</h4>
-      <img src="/horizontal-logo.png" height="80" />
-    </div>
-  </div>
 </template>
 
 <script>
-import {
-  MDBNavbar,
-  MDBNavbarToggler,
-  MDBNavbarBrand,
-  MDBNavbarNav,
-  MDBNavbarItem,
-  MDBCollapse,
-  MDBDropdownMenu,
-  MDBDropdownToggle,
-  MDBDropdown,
-} from "mdb-vue-ui-kit";
 import Menubar from "primevue/menubar";
 import Button from "primevue/button";
 import { ref } from "vue";
 import { useAuth } from "./firebase";
-import { routes } from "./router/routes";
 
 export default {
-  data: () => ({
-    stations: {
-      // Registration: "registration",
-      Vitals: "vitals",
-      Counseling: "counseling",
-      Screening: "screening",
-      Vaccination: "vaccination",
-      "Post Vaccination": "post",
+    data: () => ({
+        stations: {
+            // Registration: "registration",
+            Vitals: "vitals",
+            Counseling: "counseling",
+            Screening: "screening",
+            Vaccination: "vaccination",
+            "Post Vaccination": "post",
+        },
+        routes: [
+            {
+                to: "/issue",
+                label: "Issue",
+                icon: "pi pi-check-square",
+            },
+            {
+                to: "/station/registration",
+                label: "Registration Controls",
+                icon: "pi pi-file-o",
+            },
+            {
+                to: "/display/registration",
+                label: "Registration Display",
+                icon: "pi pi-table",
+            },
+            {
+                label: "Monitoring",
+                icon: "pi pi-fw pi-desktop",
+                items: [
+                    {
+                        to: "/monitoring/overview",
+                        label: "Queue List",
+                        icon: "pi pi-ellipsis-h",
+                    },
+                    {
+                        to: "/monitoring/vitals",
+                        label: "Vitals",
+                        icon: "pi pi-heart",
+                    },
+                    {
+                        to: "/monitoring/counseling",
+                        label: "Counseling",
+                        icon: "pi pi-home",
+                    },
+                    {
+                        to: "/monitoring/screening",
+                        label: "Screening",
+                        icon: "pi pi-user",
+                    },
+                    {
+                        to: "/monitoring/vaccination",
+                        label: "Vaccination",
+                        icon: "pi pi-pencil",
+                    },
+                    {
+                        to: "/monitoring/post",
+                        label: "Post Vaccination",
+                        icon: "pi pi-check-circle",
+                    },
+                ],
+            },
+            {
+                to: "/admin",
+                label: "Admin Controls",
+                icon: "pi pi-fw pi-desktop",
+            },
+        ],
+    }),
+    components: {
+        Menubar,
+        Button,
     },
-    routes: routes,
-  }),
-  components: {
-    MDBNavbar,
-    MDBNavbarToggler,
-    MDBNavbarBrand,
-    MDBNavbarNav,
-    MDBNavbarItem,
-    MDBCollapse,
-    MDBDropdownMenu,
-    MDBDropdownToggle,
-    MDBDropdown,
-    Menubar,
-    Button,
-  },
-  computed: {
-    inLoginPage() {
-      console.log(this.$route.path !== "/signin");
-      return this.$route.path !== "/signin";
+    computed: {
+        inLoginPage() {
+            return this.$route.path === "/signin";
+        },
     },
-  },
-  setup() {
-    const { isLogin } = useAuth();
+    setup() {
+        const { isLogin } = useAuth();
 
-    const collapse1 = ref(false);
-    const adminDropdown = ref(false);
-    const displayDropdown = ref(false);
+        const collapse1 = ref(false);
+        const adminDropdown = ref(false);
+        const displayDropdown = ref(false);
 
-    return {
-      collapse1,
-      adminDropdown,
-      displayDropdown,
-      isLogin,
-    };
-  },
+        return {
+            collapse1,
+            adminDropdown,
+            displayDropdown,
+            isLogin,
+        };
+    },
 };
 </script>
 
 <style>
 #app {
-  /* font-family: Avenir, Helvetica, Arial, sans-serif; */
-  font-family: Roboto, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+    /* font-family: Avenir, Helvetica, Arial, sans-serif; */
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #2c3e50;
 }
 
 #main-nav {
-  background-color: #2f84bd !important;
-  margin-bottom: 10px;
+    background-color: #2f84bd !important;
+    margin-bottom: 10px;
+}
+
+.login {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 </style>
