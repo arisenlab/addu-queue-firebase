@@ -193,7 +193,7 @@ export function useQueue() {
         // const timestamp = await firebase.firestore.Firestor
 
         if (perms.specialCases.includes(auth.currentUser.uid)) {
-          console.log("hello world");
+          // console.log("hello world");
           query = await queueNumAscending
             .where("stage", "==", stage)
             .where("specialCase", "==", true)
