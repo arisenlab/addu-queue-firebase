@@ -1,8 +1,5 @@
 <template>
-    <div
-        style="min-height: 100vh;"
-        :class="{ login: $route.name === '/signin' }"
-    >
+    <div style="min-height: 100vh;">
         <Menubar v-show="isLogin" :model="routes">
             <template #start>
                 <img src="../public/addu-seal.png" height="60" class="p-mr-2" />
@@ -137,12 +134,5 @@ export default {
 #main-nav {
     background-color: #2f84bd !important;
     margin-bottom: 10px;
-}
-
-.login {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
 }
 </style>
