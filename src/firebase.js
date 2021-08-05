@@ -192,21 +192,28 @@ export function useQueue() {
         // console.log(perms);
         // const timestamp = await firebase.firestore.Firestor
 
+        const cutoffTime = firebase.firestore.Timestamp.now();
+        cutoffTime.seconds -= 180;
+        console.log(cutoffTime, cutoffTime.toDate());
+
         if (perms.specialCases.includes(auth.currentUser.uid)) {
           // console.log("hello world");
           query = await queueNumAscending
+            .where("queueTime", "<=", cutoffTime)
             .where("stage", "==", stage)
             .where("specialCase", "==", true)
             .limit(1)
             .get();
           if (query.empty)
             query = await queueNumAscending
+              .where("queueTime", "<=", cutoffTime)
               .where("stage", "==", stage)
               .where("specialCase", "==", false)
               .limit(1)
               .get();
         } else {
           query = await queueNumAscending
+            .where("queueTime", "<=", cutoffTime)
             .where("stage", "==", stage)
             .where("specialCase", "==", false)
             .limit(1)
@@ -229,6 +236,7 @@ export function useQueue() {
 
           // Get the next queue num object
           nextQueueNum = { id: query.docs[0].id, ...snapshot.data() };
+          console.log(snapshot.data());
 
           // Increment the stage
           // const nextStage = snapshot.data().stage + 1;
