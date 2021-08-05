@@ -93,7 +93,7 @@
           <td>{{ queueNum.num }}</td>
           <td>{{ getStage(queueNum.stage, queueNum.timestamps) }}</td>
           <td>{{ queueNum.specialCase ? "Yes" : "" }}</td>
-          <td>{{ queueNum.queueTime.seconds }}</td>
+          <td>{{ queueNum.queueTime.toDate() }}</td>
         </tr>
       </tbody>
     </table>
