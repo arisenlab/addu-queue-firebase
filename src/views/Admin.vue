@@ -9,11 +9,15 @@
         >
           Reset Queue
         </button>
-        <button class="btn" @click="localSeedUsers" :disabled="processing">
+        <button
+          class="btn btn-success"
+          @click="localSeedUsers"
+          :disabled="processing"
+        >
           Seed Users
         </button>
         <button
-          class="btn btn-primary"
+          class="btn btn-warning"
           @click="testQueries"
           :disabled="processing"
         >
@@ -25,6 +29,13 @@
           :disabled="processing"
         >
           Fast Track a Number
+        </button>
+        <button
+          class="btn btn-success"
+          :disabled="processing"
+          @click="markDone"
+        >
+          Mark Number as Done
         </button>
       </div>
     </div>
@@ -48,6 +59,7 @@ export default {
       runTestQueries,
       getQueueNums,
       fastTrackNum,
+      markNumAsDone,
     } = useAdmin();
     const { testQuery, queryStatus } = runTestQueries();
     const { seedUserFn, seedStatus } = seedUsers();
@@ -234,6 +246,81 @@ export default {
       console.log(queueNumItem);
     };
 
+    const markDone = () => {
+      const queueNum = parseInt(prompt("Enter a number to mark as done"));
+      let error = null;
+
+      if (isNaN(queueNum)) error = "The number you entered was not valid";
+      if (queueNum > queueNumList.value.length)
+        error =
+          "The number you entered exceeded the number of people in the queue.";
+
+      if (error !== null) {
+        createToast(
+          {
+            title: "Error",
+            description: error,
+          },
+          {
+            type: "danger",
+            position: "top-center",
+          }
+        );
+        return;
+      }
+
+      processing.value = true;
+
+      const queueNumItem = queueNumList.value.find(
+        (num) => num.num === queueNum
+      );
+
+      if (queueNumItem === undefined) {
+        createToast(
+          {
+            title: "Error",
+            description:
+              "Can't find a corresponding queue item with that number.",
+          },
+          {
+            type: "danger",
+            position: "top-center",
+          }
+        );
+        return;
+      }
+
+      markNumAsDone(queueNumItem.id)
+        .then((message) => {
+          createToast(
+            {
+              title: "Success",
+              description: message,
+            },
+            {
+              type: "success",
+              position: "top-center",
+            }
+          );
+          processing.value = false;
+        })
+        .catch((err) => {
+          createToast(
+            {
+              title: "Error",
+              description: err,
+            },
+            {
+              type: "danger",
+              position: "top-center",
+            }
+          );
+          processing.value = false;
+        });
+
+      console.log(queueNumItem);
+    };
+
     watch(
       () => queryStatus.value,
       (newVal) => {
@@ -296,6 +383,7 @@ export default {
       processing,
       getStage,
       fastTrack,
+      markDone,
     };
   },
 };
