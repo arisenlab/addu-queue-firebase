@@ -193,7 +193,7 @@ export function useQueue() {
         // const timestamp = await firebase.firestore.Firestor
 
         const cutoffTime = firebase.firestore.Timestamp.now();
-        // cutoffTime.seconds -= 180;
+        cutoffTime.seconds -= 180;
         // console.log(cutoffTime, cutoffTime.toDate());
 
         if (perms.specialCases.includes(auth.currentUser.uid)) {
