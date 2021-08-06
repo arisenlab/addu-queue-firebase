@@ -143,7 +143,7 @@ export default {
       // );
 
       const finished = queueNumList.value.filter(
-        (queueNum) => queueNum.timestamps.post !== null
+        (queueNum) => queueNum.timestamps.vaccination !== null
       );
 
       if (finished.length === 0) return "Waiting...";
@@ -154,7 +154,7 @@ export default {
         finished
           .map((queueNum) => {
             const enterTime = queueNum.timestamps.issue;
-            const exitTime = queueNum.timestamps.post;
+            const exitTime = queueNum.timestamps.vaccination;
             // console.log(queueNum, "Enter: ", enterTime, "Exit:", exitTime);
             // Calculate the time in seconds
             return exitTime.seconds - enterTime.seconds;
@@ -171,7 +171,7 @@ export default {
         "counseling",
         "screening",
         "vaccination",
-        "post",
+        // "post",
       ];
 
       const timestamps = queueNumList.value.map(
@@ -225,7 +225,7 @@ export default {
         "counseling",
         "screening",
         "vaccination",
-        "post",
+        // "post",
       ];
 
       return conditions.map((station, ind) => {

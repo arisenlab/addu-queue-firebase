@@ -237,6 +237,26 @@ export default {
         return;
       }
 
+      if (
+        prompt(
+          "Are you sure you want to reject this number? This should only be used when the patient will be removed from the vaccination site. Enter 'resbakuna' if you understand.",
+          ""
+        ) !== "resbakuna"
+      ) {
+        createToast(
+          {
+            title: "Rejection Rejected",
+            description: "You did not type the correct word.",
+          },
+          {
+            type: "warning",
+            position: "top-center",
+          }
+        );
+        processing.value = false;
+        return;
+      }
+
       rejectQueueNumber(currentQueueNumber.value.id)
         .then((message) => {
           createToast(

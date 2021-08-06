@@ -1,6 +1,28 @@
 <template>
   <!-- TODO: Sort by queue no. Filter by stage -->
   <div class="row">
+    <div class="row mt-4">
+      <div class="col">
+        <label for="filterQueue">Filter Queue Number</label>
+        <input
+          type="text"
+          id="filterQueue"
+          class="form-control"
+          v-model="filterQueueNum"
+          placeholder="Filter Queue Number"
+        />
+      </div>
+      <div class="col">
+        <label for="itemsPerPage">Filter Queue Number</label>
+        <input
+          type="number"
+          id="itemsPerPage"
+          class="form-control"
+          v-model="itemsPerPage"
+          placeholder="Filter Queue Number"
+        />
+      </div>
+    </div>
     <div class="row my-4">
       <div class="col">
         <label for="queueBy">Order By: </label>
@@ -79,6 +101,20 @@
         </select>
       </div>
     </div>
+
+    <nav class="overflow-auto">
+      <MDBPagination>
+        <MDBPageItem
+          href="#"
+          v-for="num in pageNum"
+          :key="num"
+          :active="num == currPage"
+          @click="currPage = num"
+          >{{ num + 1 }}</MDBPageItem
+        >
+      </MDBPagination>
+    </nav>
+
     <table class="table">
       <thead>
         <tr>
@@ -89,7 +125,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="queueNum in filteredList" :key="queueNum.num">
+        <tr v-for="queueNum in paginatedList[currPage]" :key="queueNum.num">
           <td>{{ queueNum.num }}</td>
           <td>{{ getStage(queueNum.stage, queueNum.timestamps) }}</td>
           <td>{{ queueNum.specialCase ? "Yes" : "" }}</td>
@@ -97,16 +133,38 @@
         </tr>
       </tbody>
     </table>
+    <nav class="overflow-auto">
+      <MDBPagination class="mx-auto">
+        <MDBPageItem
+          href="#"
+          v-for="num in pageNum"
+          :key="num"
+          :active="num == currPage"
+          @click="currPage = num"
+          >{{ num + 1 }}</MDBPageItem
+        >
+      </MDBPagination>
+    </nav>
   </div>
 </template>
 
 <script>
+import _ from "lodash";
+import { MDBPagination, MDBPageItem } from "mdb-vue-ui-kit";
+
 export default {
   props: ["queueNumList"],
+  components: {
+    MDBPagination,
+    MDBPageItem,
+  },
   data: () => ({
     stageFilter: 0,
     ascendingNums: true,
     queueBy: "num",
+    filterQueueNum: "",
+    currPage: 0,
+    itemsPerPage: 100,
   }),
   computed: {
     filteredList() {
@@ -124,8 +182,10 @@ export default {
         [-1], // Exit
       ];
 
-      const filteredStage = this.queueNumList.filter((num) =>
-        filters[this.stageFilter].includes(num.stage)
+      const filteredStage = this.queueNumList.filter(
+        (num) =>
+          filters[this.stageFilter].includes(num.stage) &&
+          num.num.toString().indexOf(this.filterQueueNum) >= 0
       );
       let sortedStage;
       if (this.queueBy === "queueTime") {
@@ -139,6 +199,12 @@ export default {
       if (this.ascendingNums) return sortedStage;
       else return sortedStage.reverse();
       // return this.queueNumList.value;
+    },
+    paginatedList() {
+      return _.chunk(this.filteredList, this.itemsPerPage);
+    },
+    pageNum() {
+      return _.range(0, this.paginatedList.length);
     },
   },
   methods: {

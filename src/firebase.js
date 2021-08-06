@@ -193,8 +193,8 @@ export function useQueue() {
         // const timestamp = await firebase.firestore.Firestor
 
         const cutoffTime = firebase.firestore.Timestamp.now();
-        cutoffTime.seconds -= 180;
-        console.log(cutoffTime, cutoffTime.toDate());
+        // cutoffTime.seconds -= 180;
+        // console.log(cutoffTime, cutoffTime.toDate());
 
         if (perms.specialCases.includes(auth.currentUser.uid)) {
           // console.log("hello world");
@@ -805,11 +805,39 @@ export function useAdmin() {
     }
   };
 
+  const markNumAsDone = async (numId) => {
+    try {
+      const num = await firestore
+        .collection("queue")
+        .doc(numId)
+        .get();
+
+      const timestamps = num.data().timestamps;
+
+      for (const station of stations) {
+        // console.log(timestamps, timestamps[station], station);
+        if (timestamps[station] === null)
+          timestamps[station] = firebase.firestore.FieldValue.serverTimestamp();
+      }
+
+      await num.ref.update({
+        timestamps,
+        stage: 12,
+        specialCase: true,
+      });
+
+      return Promise.resolve("Marked number as done!");
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  };
+
   return {
     seedUsers,
     resetQueue,
     runTestQueries,
     getQueueNums,
     fastTrackNum,
+    markNumAsDone,
   };
 }
