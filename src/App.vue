@@ -1,12 +1,21 @@
 <template>
     <div style="min-height: 100vh;">
-        <Menubar v-show="isLogin" :model="routes">
+        <Menubar v-show="isLogin && !inLoginPage" :model="routes">
             <template #start>
                 <img src="../public/addu-seal.png" height="60" class="p-mr-2" />
                 <img src="../public/nav_logo.png" height="50" class="p-mr-2" />
             </template>
             <template #end>
-                <Button @click="$router.push('/signout')" label="Signout" />
+                <Button
+                    v-if="isLogin"
+                    @click="$router.push('/signout')"
+                    label="Signout"
+                />
+                <Button
+                    v-else
+                    @click="$router.push('/signin')"
+                    label="Signin"
+                />
             </template>
         </Menubar>
 
@@ -14,7 +23,7 @@
             <router-view v-bind="$attrs" />
         </div>
 
-        <div style="text-align: center">
+        <div v-show="isLogin && !inLoginPage" style="text-align: center">
             <h4 style="margin-bottom: -15px">Powered by</h4>
             <img src="/horizontal-logo.png" height="80" />
         </div>

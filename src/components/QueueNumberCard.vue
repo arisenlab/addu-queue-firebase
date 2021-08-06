@@ -1,29 +1,26 @@
 <template>
-  <MDBCard class="w-50 m-2" bg="info" text="white">
-    <MDBCardBody>
-      <MDBCardTitle>Queue Number</MDBCardTitle>
-      <MDBCardText>
-        <div class="display-1"><slot /></div>
-      </MDBCardText>
-    </MDBCardBody>
-  </MDBCard>
+    <Card class="issue-card p-m-2">
+        <template #content>
+            <h4 class="p-text-normal">Queue Number</h4>
+            <div style="font-size: 4rem"><slot /></div>
+        </template>
+    </Card>
 </template>
 
 <script>
-import {
-  MDBCard,
-  MDBCardBody,
-  MDBCardTitle,
-  MDBCardText,
-} from "mdb-vue-ui-kit";
+import Card from "primevue/card";
 export default {
-  components: {
-    MDBCard,
-    MDBCardBody,
-    MDBCardTitle,
-    MDBCardText,
-  },
+    components: {
+        Card,
+    },
 };
 </script>
 
-<style></style>
+<style scoped>
+.issue-card {
+    text-align: center;
+    min-width: 50vw;
+    background-color: var(--primary-color);
+    color: white;
+}
+</style>

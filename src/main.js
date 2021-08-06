@@ -3,7 +3,7 @@ import App from "./App.vue";
 import router from "./router/routes";
 import "mosha-vue-toastify/dist/style.css";
 // import "mdb-vue-ui-kit/css/mdb.min.css";
-//import "./assets/app.scss";
+import "./assets/app.scss";
 import PrimeVue from "primevue/config";
 //import "primevue/resources/themes/md-light-indigo/theme.css";
 import "./assets/_theme.scss";

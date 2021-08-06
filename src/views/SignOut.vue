@@ -1,21 +1,20 @@
 <template>
-  <MDBContainer class="d-flex align-items-center mt-5 flex-column">
-    <MDBSpinner color="primary" />
-    <div class="lead">Signing Out...</div>
-  </MDBContainer>
+    <div class="p-d-flex p-flex-column p-ai-center p-mt-5">
+        <ProgressSpinner />
+    </div>
 </template>
 
 <script>
-import { MDBContainer, MDBSpinner } from "mdb-vue-ui-kit";
+import ProgressSpinner from "primevue/progressspinner";
 import { useAuth } from "./../firebase";
 export default {
-  components: { MDBContainer, MDBSpinner },
-  mounted() {
-    const { signOut, isLogin } = useAuth();
-    if (isLogin) signOut();
+    components: { ProgressSpinner },
+    mounted() {
+        const { signOut, isLogin } = useAuth();
+        if (isLogin) signOut();
 
-    this.$router.push("/signin");
-  },
+        this.$router.push("/signin");
+    },
 };
 </script>
 

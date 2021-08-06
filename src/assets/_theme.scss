@@ -8,7 +8,7 @@
     --surface-f: #ffffff;
     --text-color: rgba(0, 0, 0, 0.87);
     --text-color-secondary: textSecondaryColor;
-    --primary-color: #3f51b5;
+    --primary-color: #26afe7;
     --primary-color-text: #ffffff;
     --font-family: Roboto, Helvetica Neue Light, Helvetica Neue, Helvetica,
         Arial, Lucida Grande, sans-serif;
@@ -2106,7 +2106,7 @@
 .p-buttonset.p-button-warning > .p-button,
 .p-splitbutton.p-button-warning > .p-button {
     color: #212529;
-    background: #fbc02d;
+    background: rgba(251, 192, 45, 0.92);
     border: 0 none;
 }
 .p-button.p-button-warning:enabled:hover,
