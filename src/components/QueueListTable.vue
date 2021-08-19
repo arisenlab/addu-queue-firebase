@@ -1,255 +1,286 @@
 <template>
-  <!-- TODO: Sort by queue no. Filter by stage -->
-  <div class="row">
-    <div class="row mt-4">
-      <div class="col">
-        <label for="filterQueue">Filter Queue Number</label>
-        <input
-          type="text"
-          id="filterQueue"
-          class="form-control"
-          v-model="filterQueueNum"
-          placeholder="Filter Queue Number"
-        />
-      </div>
-      <div class="col">
-        <label for="itemsPerPage">Filter Queue Number</label>
-        <input
-          type="number"
-          id="itemsPerPage"
-          class="form-control"
-          v-model="itemsPerPage"
-          placeholder="Filter Queue Number"
-        />
-      </div>
+    <!-- TODO: Sort by queue no. Filter by stage -->
+    <div class="p-col-12 p-m-auto" style="width: 90%">
+        <DataTable
+            class="p-datatable-customers"
+            ref="dt"
+            :value="getCleanList()"
+            dataKey="id"
+            v-model:filters="filters"
+            filterDisplay="row"
+            :globalFilterFields="['num', 'stage', 'case', 'timein']"
+            :paginator="true"
+            :loading="loading"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+            :rows="10"
+            responsiveLayout="scroll"
+        >
+            <template #header>
+                <div class="p-d-flex p-jc-between p-ai-center">
+                    <div class="p-d-flex p-ai-center">
+                        <h5 class="p-m-0">Queue List Numbers</h5>
+                        <Button
+                            class="p-ml-2"
+                            icon="pi pi-external-link"
+                            label="Export to CSV"
+                            @click="exportCSV($event)"
+                        />
+                    </div>
+                    <span class="p-input-icon-left">
+                        <i class="pi pi-search" />
+                        <InputText
+                            v-model="filters['global'].value"
+                            placeholder="Number Search"
+                        />
+                    </span>
+                </div>
+            </template>
+            <template #empty> No queue yet. </template>
+            <Column field="num" header="Queue Number" :sortable="true">
+                <template #body="{ data }">
+                    {{ data.num }}
+                </template>
+                <template #filter="{ filterModel, filterCallback }">
+                    <InputText
+                        type="text"
+                        v-model="filterModel.value"
+                        @change="filterCallback"
+                        class="p-column-filter"
+                        placeholder="Search by name"
+                    />
+                </template>
+            </Column>
+            <Column field="stage" header="Current Stage" :sortable="true">
+                <template #body="{ data }">
+                    <span>
+                        {{ data.stage }}
+                    </span>
+                </template>
+                <template #filter="{ filterModel, filterCallback }">
+                    <Dropdown
+                        v-model="filterModel.value"
+                        @change="filterCallback()"
+                        :options="stages"
+                        placeholder="Stages"
+                        class="p-column-filter"
+                        :showClear="true"
+                    >
+                        <template #value="slotProps">
+                            <span v-if="slotProps.value">
+                                {{ slotProps.value }}
+                            </span>
+                            <span v-else>{{ slotProps.placeholder }}</span>
+                        </template>
+                        <template #optiongroup="slotProps">
+                            <span>
+                                {{ slotProps.option.stage }}
+                            </span>
+                        </template>
+                    </Dropdown>
+                </template>
+            </Column>
+            <Column field="case" header="Special Case" dataType="boolean">
+                <template #body="{ data }" class="p-d-flex p-jc-center">
+                    {{ data.case ? "Yes" : "" }}
+                </template>
+                <template #filter="{ filterModel, filterCallback }">
+                    <Checkbox
+                        v-model="filterModel.value"
+                        @change="filterCallback()"
+                        :binary="true"
+                    />
+                </template>
+            </Column>
+            <Column field="timein" header="Queue Time" :sortable="true">
+            </Column>
+        </DataTable>
     </div>
-    <div class="row my-4">
-      <div class="col">
-        <label for="queueBy">Order By: </label>
-        <div id="queueBy" class="row">
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              v-model="queueBy"
-              type="radio"
-              name="queueBy"
-              id="queueByNum"
-              value="num"
-            />
-            <label class="form-check-label" for="queueByNum"
-              >Queue Number</label
-            >
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              v-model="queueBy"
-              type="radio"
-              name="queueBy"
-              id="queueByOrder"
-              value="queueTime"
-            />
-            <label class="form-check-label" for="queueByOrder"
-              >Queue Order</label
-            >
-          </div>
-        </div>
-      </div>
-      <div class="col">
-        <label for="ascendingNums">Order Numbers: </label>
-        <div id="ascendingNums" class="row">
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              v-model="ascendingNums"
-              type="radio"
-              name="orderNums"
-              id="numAsc"
-              :value="true"
-            />
-            <label class="form-check-label" for="numAsc">Ascending</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              v-model="ascendingNums"
-              type="radio"
-              name="orderNums"
-              id="numDesc"
-              :value="false"
-            />
-            <label class="form-check-label" for="numDesc">Descending</label>
-          </div>
-        </div>
-      </div>
-      <div class="col">
-        <label for="stageFilter">Filter by Stage</label>
-        <select
-          name="stageFilter"
-          v-model="stageFilter"
-          class="form-select shadow"
-        >
-          <option :value="0">No Filter</option>
-          <option :value="1">Registration</option>
-          <option :value="2">Vitals</option>
-          <option :value="3">Counseling</option>
-          <option :value="4">Screening</option>
-          <option :value="5">Vaccination</option>
-          <option :value="6">Post Vaccination</option>
-          <option :value="7">Done</option>
-          <option :value="8">Rejected</option>
-        </select>
-      </div>
-    </div>
-
-    <nav class="overflow-auto">
-      <MDBPagination>
-        <MDBPageItem
-          href="#"
-          v-for="num in pageNum"
-          :key="num"
-          :active="num == currPage"
-          @click="currPage = num"
-          >{{ num + 1 }}</MDBPageItem
-        >
-      </MDBPagination>
-    </nav>
-
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Queue Number</th>
-          <th>Current Stage</th>
-          <th>Special Case?</th>
-          <th>Queue Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="queueNum in paginatedList[currPage]" :key="queueNum.num">
-          <td>{{ queueNum.num }}</td>
-          <td>{{ getStage(queueNum.stage, queueNum.timestamps) }}</td>
-          <td>{{ queueNum.specialCase ? "Yes" : "" }}</td>
-          <td>{{ queueNum.queueTime.toDate() }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <nav class="overflow-auto">
-      <MDBPagination class="mx-auto">
-        <MDBPageItem
-          href="#"
-          v-for="num in pageNum"
-          :key="num"
-          :active="num == currPage"
-          @click="currPage = num"
-          >{{ num + 1 }}</MDBPageItem
-        >
-      </MDBPagination>
-    </nav>
-  </div>
 </template>
 
 <script>
 import _ from "lodash";
-import { MDBPagination, MDBPageItem } from "mdb-vue-ui-kit";
+/* import { MDBPagination, MDBPageItem } from "mdb-vue-ui-kit"; */
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import InputText from "primevue/inputtext";
+import Dropdown from "primevue/dropdown";
+import Checkbox from "primevue/checkbox";
+import Button from "primevue/button";
+import { FilterMatchMode } from "primevue/api";
 
 export default {
-  props: ["queueNumList"],
-  components: {
-    MDBPagination,
-    MDBPageItem,
-  },
-  data: () => ({
-    stageFilter: 0,
-    ascendingNums: true,
-    queueBy: "num",
-    filterQueueNum: "",
-    currPage: 0,
-    itemsPerPage: 100,
-  }),
-  computed: {
-    filteredList() {
-      // console.log(this.queueNumList.value);
-      // if (!this.queueNumList.value) return;
-      const filters = [
-        [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // No filter
-        [0, 1], // Registration
-        [2, 3], //  Vitals
-        [4, 5], // Counseling
-        [6, 7], // Screening
-        [8, 9], // Vaccination
-        [10, 11], // Post-Vaccination
-        [12], // Exit
-        [-1], // Exit
-      ];
-
-      const filteredStage = this.queueNumList.filter(
-        (num) =>
-          filters[this.stageFilter].includes(num.stage) &&
-          num.num.toString().indexOf(this.filterQueueNum) >= 0
-      );
-      let sortedStage;
-      if (this.queueBy === "queueTime") {
-        // console.log("Filtering by queue Time");
-        sortedStage = filteredStage.sort((first, second) => {
-          // console.log(first, second);
-          return first.queueTime.seconds - second.queueTime.seconds;
-        });
-      } else sortedStage = filteredStage;
-
-      if (this.ascendingNums) return sortedStage;
-      else return sortedStage.reverse();
-      // return this.queueNumList.value;
+    props: ["queueNumList"],
+    components: {
+        /* MDBPagination,
+    MDBPageItem, */
+        Button,
+        DataTable,
+        Column,
+        Dropdown,
+        InputText,
+        Checkbox,
     },
-    paginatedList() {
-      return _.chunk(this.filteredList, this.itemsPerPage);
+    data: () => ({
+        stageFilter: 0,
+        ascendingNums: true,
+        queueBy: "num",
+        filterQueueNum: "",
+        currPage: 0,
+        itemsPerPage: 100,
+        current_list: [],
+        filters: null,
+        loading: true,
+        stages: [
+            "Issued Num",
+            "Registration",
+            "Vitals",
+            "Counseling",
+            "Screening",
+            "Vaccination",
+            "Post Vaccination",
+            "Done",
+        ],
+    }),
+    created() {
+        this.initFilters();
     },
-    pageNum() {
-      return _.range(0, this.paginatedList.length);
+    mounted() {
+        this.current_list = this.queueNumList;
+        this.loading = false;
     },
-  },
-  methods: {
-    getStage(stage, timestamps) {
-      if (stage === -1) {
-        // console.log(timestamps);
-        const stationNames = [
-          "post",
-          "vaccination",
-          "screening",
-          "counseling",
-          "vitals",
-          "registration",
-        ];
+    computed: {
+        filteredList() {
+            // console.log(this.queueNumList.value);
+            // if (!this.queueNumList.value) return;
+            const filters = [
+                [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // No filter
+                [0, 1], // Registration
+                [2, 3], //  Vitals
+                [4, 5], // Counseling
+                [6, 7], // Screening
+                [8, 9], // Vaccination
+                [10, 11], // Post-Vaccination
+                [12], // Exit
+                [-1], // Exit
+            ];
 
-        for (var x = 0; x < stationNames.length; x++) {
-          // console.log(stationNames[x], timestamps[stationNames[x]]);
-          if (timestamps[stationNames[x]] != null) {
-            // console.log("REJECTED THIS THING");
-            return `Rejected at ${stationNames[x - 1]}`;
-          }
-        }
-      }
+            const filteredStage = this.queueNumList.filter(
+                num =>
+                    filters[this.stageFilter].includes(num.stage) &&
+                    num.num.toString().indexOf(this.filterQueueNum) >= 0
+            );
+            let sortedStage;
+            if (this.queueBy === "queueTime") {
+                // console.log("Filtering by queue Time");
+                sortedStage = filteredStage.sort((first, second) => {
+                    // console.log(first, second);
+                    return first.queueTime.seconds - second.queueTime.seconds;
+                });
+            } else sortedStage = filteredStage;
 
-      const actualStage = stage + 1;
-      const stages = [
-        "Rejected",
-        "Issued Num",
-        // "Registration",
-        "Registration",
-        "Vitals",
-        "Vitals",
-        "Counseling",
-        "Counseling",
-        "Screening",
-        "Screening",
-        "Vaccination",
-        "Vaccination",
-        "Post-Vaccination",
-        "Post-Vaccination",
-        "Done",
-      ];
-
-      return stages[actualStage];
+            if (this.ascendingNums) return sortedStage;
+            else return sortedStage.reverse();
+            // return this.queueNumList.value;
+        },
+        paginatedList() {
+            return _.chunk(this.filteredList, this.itemsPerPage);
+        },
+        pageNum() {
+            return _.range(0, this.paginatedList.length);
+        },
     },
-  },
+    methods: {
+        getStage(stage, timestamps) {
+            if (stage === -1) {
+                // console.log(timestamps);
+                const stationNames = [
+                    "post",
+                    "vaccination",
+                    "screening",
+                    "counseling",
+                    "vitals",
+                    "registration",
+                ];
+
+                for (var x = 0; x < stationNames.length; x++) {
+                    // console.log(stationNames[x], timestamps[stationNames[x]]);
+                    if (timestamps[stationNames[x]] != null) {
+                        // console.log("REJECTED THIS THING");
+                        return `Rejected at ${stationNames[x - 1]}`;
+                    }
+                }
+            }
+
+            const actualStage = stage + 1;
+            const stages = [
+                "Rejected",
+                "Issued Num",
+                // "Registration",
+                "Registration",
+                "Vitals",
+                "Vitals",
+                "Counseling",
+                "Counseling",
+                "Screening",
+                "Screening",
+                "Vaccination",
+                "Vaccination",
+                "Post-Vaccination",
+                "Post-Vaccination",
+                "Done",
+            ];
+
+            return stages[actualStage];
+        },
+        getCleanList() {
+            let new_list = [];
+            for (let queue_num of this.queueNumList) {
+                new_list.push({
+                    id: queue_num.num,
+                    num: queue_num.num.toString(),
+                    stage: this.getStage(queue_num.stage, queue_num.timestamps),
+                    case: queue_num.case,
+                    timein: queue_num.queueTime.toDate().toLocaleString(),
+                });
+                console.log(queue_num.num);
+            }
+
+            return new_list;
+        },
+        initFilters() {
+            this.filters = {
+                global: { value: null, matchMode: FilterMatchMode.EQUALS },
+                num: { value: null, matchMode: FilterMatchMode.CONTAINS },
+                stage: { value: null, matchMode: FilterMatchMode.CONTAINS },
+                case: { value: null, matchMode: FilterMatchMode.EQUALS },
+                date: { value: null, matchMode: FilterMatchMode.DATE_IS },
+            };
+        },
+        exportCSV() {
+            this.$refs.dt.exportCSV();
+        },
+    },
 };
 </script>
+
+<style scoped>
+.customer-badge {
+    border-radius: 2px;
+    padding: 0.25em 0.5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+}
+
+.customer-badge.status-qualified {
+    background-color: #c8e6c9;
+    color: #256029;
+}
+
+.customer-badge.status-rejected {
+    background-color: #c8e6c9;
+    color: #c63737;
+}
+</style>

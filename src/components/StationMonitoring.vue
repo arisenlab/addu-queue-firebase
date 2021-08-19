@@ -1,7 +1,7 @@
 <template>
     <div class="root p-grid">
         <!-- Number of People In Vitals -->
-        <Card class="p-col-12">
+        <Card class="p-col-12 p-mt-2">
             <template #title>
                 <span class="p-text-light"
                     >Number of People Waiting in {{ currentStationName }}</span
@@ -11,36 +11,23 @@
                 <span
                     v-if="waitingQueueList"
                     class="p-text-normal"
-                    style="font-size: 3.5rem;"
+                    style="font-size: 3.5rem"
                 >
                     {{ waitingQueueList.length }}
                 </span>
-                <span v-else class="p-text-normal" style="font-size: 3.5rem;">
+                <span v-else class="p-text-normal" style="font-size: 3.5rem">
                     0
                 </span>
             </template>
         </Card>
 
-        <!-- Average Waiting Time -->
-        <!-- <MDBCard style="grid-area: avgTime">
-      <MDBCardBody class="text-center">
-        <MDBCardTitle>Average Waiting Time</MDBCardTitle>
-        <MDBCardText class="card-text">
-          <h2 class="display-2">{{ averageTimePerPerson }}</h2>
-          <p class="subtitle-1" v-if="averageTimePerPerson != 'Waiting...'">
-            h:m:s
-          </p>
-        </MDBCardText>
-      </MDBCardBody> -->
-        <!-- </MDBCard> -->
-
         <div
             class="p-p-2 p-col-12 p-mt-2"
             :style="{
-                gridArea: 'hero',
-                backgroundColor: 'var(--blue-700)',
+                backgroundColor: 'var(--blue-500)',
                 color: 'white',
                 fontSize: '2.5rem',
+                fontWeight: 'lighter',
                 borderRadius: '5px',
             }"
         >
@@ -51,38 +38,47 @@
         <div class="p-col-12 p-mt-2">
             <div class="p-grid">
                 <Panel class="p-col-6">
-                    <h4 class="p-text-light">Number Selected</h4>
-                    <h2
-                        v-if="currentQueueNumber"
-                        class="p-text-normal"
-                        style="fontSize: 4rem;"
-                    >
-                        {{ currentQueueNumber.num }}
-                    </h2>
-                    <h2 v-else class="p-text-normal" style="fontSize: 4rem;"
-                        >None</h2
-                    >
+                    <div class="p-d-flex p-flex-column p-ai-center p-jc-center">
+                        <div class="p-text-light" style="font-size: 1.5rem">
+                            Queue Num Selected</div
+                        >
+                        <h2
+                            v-if="currentQueueNumber"
+                            class="p-text-normal"
+                            style="font-size: 2.5rem"
+                        >
+                            {{ currentQueueNumber.num }}
+                        </h2>
+                        <h2
+                            v-else
+                            class="p-text-normal"
+                            style="font-size: 2.5rem"
+                            >None</h2
+                        >
+                    </div>
                 </Panel>
 
-                <div class="p-col-6">
-                    <div class="p-d-flex p-flex-column">
-                        <Button
-                            class="p-button-success p-mb-2"
-                            style="height:100%;text-align:center"
-                            @click="advanceNum"
-                            :disabled="processing"
-                        >
-                            Move to Next Step
-                        </Button>
-                        <Button
-                            v-if="stationStage < 8"
-                            class="p-button-danger"
-                            style="height:100%;text-align:center"
-                            @click="rejectNum"
-                            :disabled="processing"
-                        >
-                            Reject Patient
-                        </Button>
+                <div class="p-col-6 p-d-flex p-ai-center p-jc-center">
+                    <div class="p-grid" style="height: 100%; width: 100%">
+                        <div v-if="stationStage < 8" class="p-col-12">
+                            <Button
+                                class="p-button-danger p-button-lg p-d-flex p-jc-center"
+                                style="width: 100%; height: 100%"
+                                @click="rejectNum"
+                            >
+                                Reject the Patient
+                            </Button>
+                        </div>
+                        <div class="p-col-12">
+                            <Button
+                                class="p-button-success p-button-lg p-d-flex p-jc-center"
+                                style="width: 100%; height: 100%"
+                                @click="advanceNum"
+                                :disabled="processing"
+                            >
+                                Move to Next Step
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -90,38 +86,23 @@
         <!-- </div> -->
         <div class="mt-4" />
         <div
-            class="p-col-2 mt-2"
+            class="p-col-3 p-md-2 mt-2"
             v-for="(queueItem, ind) in waitingQueueList"
             :key="ind"
         >
-            <MDBBtn
-                :color="ind % 2 ? 'primary' : 'warning'"
-                class="w-100"
+            <div
+                :class="{
+                    'even-num': ind % 2 == 0,
+                    'odd-num': ind % 2 == 1,
+                }"
+                class="p-d-flex p-flex-column p-jc-center p-ai-center"
                 @click.prevent="selectQueueNumber(ind)"
             >
-                <h1>{{ queueItem.num }}</h1>
-                <p>Queue No.</p>
-            </MDBBtn>
-
-            <!-- <MDBCard
-          :bg="ind % 2 ? 'primary' : 'warning'"
-          :text="ind % 2 ? 'white' : 'black'"
-          class="text-center my-1"
-        >
-          <a
-            href="#"
-            :class="{
-              'text-white': ind % 2,
-              'text-black': !(ind % 2),
-            }"
-            @click.prevent="selectQueueNumber(ind)"
-          >
-            <MDBCardBody>
-              <MDBCardTitle>{{ queueItem.num }}</MDBCardTitle>
-              <MDBCardText>Queue Num</MDBCardText>
-            </MDBCardBody>
-          </a>
-        </MDBCard> -->
+                <div style="font-size: 2rem">{{ queueItem.num }}</div>
+                <div style="font-size: 1rem; font-weight: lighter"
+                    >Queue No.</div
+                >
+            </div>
         </div>
     </div>
 </template>
@@ -130,7 +111,6 @@
 import { computed, ref } from "@vue/runtime-core";
 import { useMonitoring } from "../firebase";
 import { createToast } from "mosha-vue-toastify";
-import { MDBBtn } from "mdb-vue-ui-kit";
 import Card from "primevue/card";
 import Panel from "primevue/panel";
 import Button from "primevue/button";
@@ -142,7 +122,6 @@ export default {
         Button,
         Card,
         Panel,
-        MDBBtn,
     },
     setup(props) {
         const {
@@ -187,7 +166,7 @@ export default {
         });
 
         const selectQueueNumber = ind => {
-            window.scrollTo(0, 0);
+            window.scrollTo({ top: 0, behavior: "smooth" });
             currentQueueNumber.value = queueList.value[ind];
         };
 
@@ -238,7 +217,6 @@ export default {
                 });
         };
 
-<<<<<<< HEAD
         const rejectNum = () => {
             processing.value = true;
             if (!currentQueueNumber.value) {
@@ -254,38 +232,6 @@ export default {
                 );
                 processing.value = false;
                 return;
-=======
-      if (
-        prompt(
-          "Are you sure you want to reject this number? This should only be used when the patient will be removed from the vaccination site. Enter 'resbakuna' if you understand.",
-          ""
-        ) !== "resbakuna"
-      ) {
-        createToast(
-          {
-            title: "Rejection Rejected",
-            description: "You did not type the correct word.",
-          },
-          {
-            type: "warning",
-            position: "top-center",
-          }
-        );
-        processing.value = false;
-        return;
-      }
-
-      rejectQueueNumber(currentQueueNumber.value.id)
-        .then((message) => {
-          createToast(
-            {
-              title: "Success",
-              description: message,
-            },
-            {
-              type: "success",
-              position: "top-center",
->>>>>>> master
             }
 
             rejectQueueNumber(currentQueueNumber.value.id)
@@ -350,5 +296,41 @@ export default {
     text-align: center;
     width: 90%;
     margin: auto;
+}
+.even-num {
+    color: #fff;
+    background-color: hsla(35, 100%, 50%, 1);
+    border-radius: 10px;
+    min-height: 100px;
+}
+.even-num:hover {
+    color: #fff;
+    background-color: hsla(35, 100%, 45%, 1);
+    cursor: pointer;
+}
+.odd-num {
+    color: #fff;
+    background-color: hsla(197, 80%, 50%, 1);
+    border-radius: 10px;
+    min-height: 100px;
+}
+.odd-num:hover {
+    color: #fff;
+    background-color: hsla(197, 80%, 45%, 1);
+    cursor: pointer;
+}
+.next-step {
+    color: white;
+    background-color: hsla(134, 61%, 50%, 1);
+}
+.next-step:hover {
+    background-color: hsla(134, 61%, 45%, 1);
+}
+.reject {
+    color: white;
+    background-color: hsla(354, 70%, 50%, 1);
+}
+.reject:hover {
+    background-color: hsla(354, 70%, 45%, 1);
 }
 </style>

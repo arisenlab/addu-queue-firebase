@@ -1,71 +1,96 @@
 <template>
-    <Card id="control-layout" class="p-shadow-5">
+    <Card class="p-shadow-5">
         <template #content>
-            <h1 class="p-text-normal">Current Queue Number</h1>
-            <div class="p-d-flex p-jc-center p-m-2">
-                <queue-number-card>
-                    <span v-if="this.currentlyServing === null">None</span>
-                    <span v-else>{{ currentlyServing.num }}</span>
-                </queue-number-card>
-            </div>
-            <div v-if="this.currentlyServing">
-                <Button
-                    class="btns p-button"
-                    :disabled="processing"
-                    @click="finishAndCallNext"
-                >
-                    Call Next Number
-                </Button>
-                <h5 class="p-text-normal">
-                    Finish with current patient and call another number
-                </h5>
-            </div>
-            <div v-else>
-                <Button
-                    class="btns p-button"
-                    :disabled="processing"
-                    @click="callNext"
-                >
-                    Call Next Number
-                </Button>
-                <h5 class="p-text-normal">Call a number from the queue</h5>
-            </div>
-            <div v-if="this.currentlyServing">
-                <Button
-                    class="btns p-button p-button-info"
-                    :disabled="processing"
-                    @click="finishCurrent"
-                >
-                    FINISH
-                </Button>
-                <h5 class="p-text-normal">Finish with current patient</h5>
-                <Button
-                    class="btns p-button-sm p-button-danger"
-                    :disabled="processing"
-                    @click="unqueueNumLocal"
-                >
-                    Send Back
-                </Button>
-                <h5 class="p-text-normal">
-                    Send current patient back to the queue<br />
-                    <small class="text-danger"
-                        >Only do this when the patient is late or missing</small
+            <div class="p-grid p-d-flex p-jc-center">
+                <div class="p-col-12">
+                    <div class="p-m-2 p-d-flex p-jc-center">
+                        <queue-number-card>
+                            <span v-if="this.currentlyServing === null"
+                                >None</span
+                            >
+                            <span v-else>{{ currentlyServing.num }}</span>
+                        </queue-number-card>
+                    </div>
+                </div>
+
+                <div>
+                    <div
+                        v-if="this.currentlyServing"
+                        class="p-col-12"
+                        style="text-align: center"
                     >
-                </h5>
-                <Button
-                    class="btns p-button-sm p-button-danger"
-                    :disabled="processing"
-                    @click="rejectNumLocal"
-                >
-                    Reject
-                </Button>
-                <h5 class="p-text-normal">
-                    Remove current patient from the queue<br />
-                    <small class="p-error">
-                        Only do this when the patient is not valid for
-                        vaccination
-                    </small>
-                </h5>
+                        <Button
+                            class="p-button"
+                            :disabled="processing"
+                            @click="finishAndCallNext"
+                        >
+                            Call Next Number
+                        </Button>
+                        <div class="p-text-normal">
+                            Finish with current patient and call another number
+                        </div>
+                    </div>
+                    <div v-else class="p-col-12" style="text-align: center">
+                        <Button
+                            class="p-button"
+                            :disabled="processing"
+                            @click="callNext"
+                        >
+                            Call Next Number
+                        </Button>
+                        <div class="p-text-normal"
+                            >Call a number from the queue</div
+                        >
+                    </div>
+                </div>
+                <div class="p-col-12 p-d-flex p-jc-center">
+                    <div v-if="this.currentlyServing" class="p-grid">
+                        <div class="p-col-12" style="text-align: center">
+                            <Button
+                                class="p-button p-button-info"
+                                :disabled="processing"
+                                @click="finishCurrent"
+                            >
+                                FINISH
+                            </Button>
+                            <div class="p-text-normal"
+                                >Finish with current patient</div
+                            >
+                        </div>
+                        <div class="p-col-12" style="text-align: center">
+                            <Button
+                                class="p-button p-button-warning"
+                                :disabled="processing"
+                                @click="unqueueNumLocal"
+                            >
+                                Send Back
+                            </Button>
+                            <div class="p-text-normal">
+                                Send current patient back to the queue<br />
+                                <small class="p-error"
+                                    >Only do this when the patient is late or
+                                    missing</small
+                                >
+                            </div>
+                        </div>
+                        <div class="p-col-12" style="text-align: center">
+                            <Button
+                                class="p-button p-button-danger"
+                                :disabled="processing"
+                                @click="rejectNumLocal"
+                            >
+                                Reject
+                            </Button>
+                            <div class="p-text-normal">
+                                Remove current patient from the queue<br />
+                                <small class="p-error">
+                                    Only do this when the patient is not valid
+                                    for vaccination
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </template>
     </Card>

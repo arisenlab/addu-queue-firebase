@@ -1,131 +1,101 @@
 <template>
-  <div class="dashboard-layout container">
-    <!-- {{ averageTimePerStation }} -->
-    <MDBCard
-      style="grid-area: numVax"
-      bg="primary"
-      text="white"
-      class="text-center"
-    >
-      <MDBCardBody>
-        <MDBCardTitle>Number of People Vaccinated</MDBCardTitle>
-        <MDBCardText class="display-2">{{ numVaccinated.length }}</MDBCardText>
-      </MDBCardBody>
-    </MDBCard>
-    <MDBCard style="grid-area: inQueue" bg="warning" class="text-center">
-      <MDBCardBody>
-        <MDBCardTitle>Number of People in Queue</MDBCardTitle>
-        <MDBCardText class="display-2">{{ peopleInQueue.length }}</MDBCardText>
-      </MDBCardBody>
-    </MDBCard>
-    <MDBCard
-      style="grid-area: AvgTime"
-      bg="warning"
-      text="black"
-      class="text-center"
-    >
-      <MDBCardBody>
-        <MDBCardTitle>Average Time Per Person</MDBCardTitle>
-        <MDBCardText class="display-2"
-          >{{ averageTimePerPerson ? averageTimePerPerson : `Waiting...` }}
-        </MDBCardText>
-      </MDBCardBody>
-    </MDBCard>
-    <MDBCard
-      style="grid-area: timeRegistration"
-      bg="primary"
-      text="white"
-      class="text-center"
-    >
-      <MDBCardBody>
-        <MDBCardTitle>Vaccination Start Time</MDBCardTitle>
-        <MDBCardText class="display-2">{{ startTime }} </MDBCardText>
-      </MDBCardBody>
-    </MDBCard>
-    <MDBCard
-      style="grid-area: latestIssued"
-      bg="info"
-      class="text-center text-white"
-    >
-      <MDBCardBody>
-        <MDBCardTitle>Latest Number Issued</MDBCardTitle>
-        <MDBCardText class="display-2 ">{{ queueNumList.length }}</MDBCardText>
-      </MDBCardBody>
-    </MDBCard>
-
-    <MDBCard style="grid-area: rejected" bg="warning" class="text-center">
-      <MDBCardBody>
-        <MDBCardTitle>Number of People Rejected</MDBCardTitle>
-        <MDBCardText class="display-2">{{ numRejected.length }}</MDBCardText>
-      </MDBCardBody>
-    </MDBCard>
-
-    <div
-      class="bg-primary lead text-white rounded text-center p-2"
-      style="grid-area: numLabel"
-    >
-      Number of People in Stations
+  <div class="p-grid p-m-auto" style="width: 85%">
+    <div class="p-col p-sm-12 p-md-6">
+      <div class="custom-card-1">
+        <div class="card-title">Number of People Vaccinated</div>
+        <div class="card-content">
+          {{ numVaccinated.length }}
+        </div>
+      </div>
+    </div>
+    <div class="p-col p-sm-12 p-md-6">
+      <div class="custom-card-2">
+        <div class="card-title">Average Time Per Person</div>
+        <div class="card-content">
+          {{ averageTimePerPerson ? averageTimePerPerson : `Waiting...` }}
+        </div>
+      </div>
+    </div>
+    <div class="p-col p-sm-12 p-md-6">
+      <div class="custom-card-1">
+        <div class="card-title">Number of People in Queue</div>
+        <div class="card-content">
+          {{ peopleInQueue.length }}
+        </div>
+      </div>
+    </div>
+    <div class="p-col p-sm-12 p-md-6">
+      <div class="custom-card-2">
+        <div class="card-title">Vaccination Start Time</div>
+        <div class="card-content">
+          {{ startTime }}
+        </div>
+      </div>
+    </div>
+    <div class="p-col p-sm-12 p-md-6">
+      <div class="custom-card-1">
+        <div class="card-title">Latest Number Issued</div>
+        <div class="card-content">
+          {{ queueNumList.length }}
+        </div>
+      </div>
+    </div>
+    <div class="p-col p-sm-12 p-md-6">
+      <div class="custom-card-2">
+        <div class="card-title">Number of People Rejected</div>
+        <div class="card-content">
+          {{ numRejected.length }}
+        </div>
+      </div>
     </div>
 
-    <div class="num-person-display">
-      <MDBCard
-        v-for="(queue, ind) in queueInStations"
-        :key="queue.station"
-        :bg="ind % 2 ? 'primary' : 'warning'"
-        :text="ind % 2 ? 'white' : 'black'"
-        class="text-center"
-      >
-        <MDBCardBody>
-          <MDBCardTitle class="lead">{{ queue.station }}</MDBCardTitle>
-          <MDBCardText class="display-3">{{ queue.count }}</MDBCardText>
-        </MDBCardBody>
-      </MDBCard>
+    <div class="p-p-2 p-col-12 section-name">Number of People in Stations</div>
+
+    <div class="p-col-12">
+      <div class="p-grid">
+        <div
+          class="p-col p-sm-6 p-md-4 p-lg-2"
+          v-for="(queue, ind) in queueInStations"
+          :key="queue.station"
+        >
+          <div :class="`custom-card-${ind % 2 ? '1' : '2'}`">
+            <div class="mini-card-title p-mb-2">{{ queue.station }}</div>
+            <div class="mini-card-content">
+              <span>{{ queue.count }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div
-      class="bg-primary lead text-white rounded text-center p-2"
-      style="grid-area: waitLabel"
-    >
-      Waiting Time in Stations
-    </div>
+    <div class="p-p-2 p-col-12 section-name">Waiting Time in Stations</div>
 
-    <div class="num-person-display" style="grid-area: waitTime">
-      <MDBCard
-        v-for="(queue, ind) in averageTimePerStation"
-        :key="queue.station"
-        :bg="ind % 2 ? 'primary' : 'warning'"
-        :text="ind % 2 ? 'white' : 'black'"
-        class="text-center"
-      >
-        <MDBCardBody>
-          <MDBCardTitle class="lead">{{ queue.station }}</MDBCardTitle>
-          <MDBCardText class="display-6">
-            {{ queue.time }}<br />
-            <small class="lead">h:m:s</small>
-          </MDBCardText>
-        </MDBCardBody>
-      </MDBCard>
+    <div class="p-col-12">
+      <div class="p-grid">
+        <div
+          v-for="(queue, ind) in averageTimePerStation"
+          :key="queue.station"
+          class="p-col p-sm-6 p-md-4 p-lg-2"
+        >
+          <div :class="`custom-card-${ind % 2 ? '1' : '2'}`">
+            <div class="mini-card-title">{{ queue.station }}</div>
+            <div class="mini-card-content">
+              {{ queue.time }}<br />
+              <small>h:m:s</small>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import {
-  MDBCard,
-  MDBCardBody,
-  MDBCardText,
-  MDBCardTitle,
-} from "mdb-vue-ui-kit";
 import { useAdmin } from "../firebase";
 import { computed } from "@vue/runtime-core";
 
 export default {
-  components: {
-    MDBCard,
-    MDBCardBody,
-    MDBCardText,
-    MDBCardTitle,
-  },
+  components: {},
   setup() {
     const { getQueueNums } = useAdmin();
     const queueNumList = getQueueNums();
@@ -177,7 +147,7 @@ export default {
       const timestamps = queueNumList.value.map(
         (queueNum) => queueNum.timestamps
       );
-      // console.log("Timestamps", timestamps);
+      //console.log("Timestamps", timestamps);
 
       const avgTimes = [];
 
@@ -294,3 +264,70 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.color-1 {
+  background-color: var(--primary-color);
+  color: #fff;
+  text-align: center;
+}
+
+.color-2 {
+  background-color: #ffa322;
+  text-align: center;
+}
+
+.card-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.card-content {
+  font-size: 4rem;
+  font-weight: lighter;
+}
+
+.mini-card-title {
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.mini-card-content {
+  font-size: 2.5rem;
+  font-weight: lighter;
+}
+
+.mini-card-title > small,
+.mini-card-content > small {
+  font-size: 1.4rem;
+}
+
+.mini-card-content > span {
+  font-size: 4rem;
+}
+
+.custom-card-1 {
+  background-color: var(--primary-color);
+  color: #fff;
+  text-align: center;
+  padding: 50px;
+  border-radius: 10px;
+}
+
+.custom-card-2 {
+  background-color: #ffa322;
+  text-align: center;
+  padding: 50px;
+  border-radius: 10px;
+}
+
+.section-name {
+  background-color: var(--blue-700);
+  color: white;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 1.5rem;
+}
+</style>
+

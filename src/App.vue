@@ -1,6 +1,10 @@
 <template>
-    <div style="min-height: 100vh;">
-        <Menubar v-show="isLogin && !inLoginPage" :model="routes">
+    <div style="min-height: 100vh">
+        <Menubar
+            v-show="isLogin || !inLoginPage"
+            :model="routes"
+            class="p-shadow-1"
+        >
             <template #start>
                 <img src="../public/addu-seal.png" height="60" class="p-mr-2" />
                 <img src="../public/nav_logo.png" height="50" class="p-mr-2" />
@@ -47,6 +51,11 @@ export default {
             "Post Vaccination": "post",
         },
         routes: [
+            {
+                to: "/",
+                label: "Dashboard",
+                icon: "pi pi-chart-bar",
+            },
             {
                 to: "/issue",
                 label: "Issue",

@@ -1,42 +1,37 @@
 <template>
-  <div class="container">
-    <div class="col">
-      <div class="d-flex">
-        <button
-          class="btn btn-danger"
+  <div class="grid">
+    <div class="p-col-12">
+      <div class="p-d-flex p-jc-center">
+        <Button
+          label="Reset Queue"
+          class="p-button-raised p-button-danger"
+          :loading="processing"
           @click="localResetQueue"
-          :disabled="processing"
-        >
-          Reset Queue
-        </button>
-        <button
-          class="btn btn-success"
+        />
+        <Button
+          label="Seed Users"
+          class="p-button-raised p-button-success p-ml-2"
+          :loading="processing"
           @click="localSeedUsers"
-          :disabled="processing"
-        >
-          Seed Users
-        </button>
-        <button
-          class="btn btn-warning"
+        />
+        <Button
+          label="Run Test Queries"
+          class="p-button-raised p-button-warning p-ml-2"
+          :loading="processing"
           @click="testQueries"
-          :disabled="processing"
-        >
-          Run Test Queries
-        </button>
-        <button
-          class="btn btn-primary"
+        />
+        <Button
+          label="Fast Track a Number"
+          class="p-button-raised p-ml-2"
+          :loading="processing"
           @click="fastTrack"
-          :disabled="processing"
-        >
-          Fast Track a Number
-        </button>
-        <button
-          class="btn btn-success"
-          :disabled="processing"
+        />
+        <Button
+          label="Mark Number as Done"
+          class="p-button-raised p-button-success p-ml-2"
+          :loading="processing"
           @click="markDone"
-        >
-          Mark Number as Done
-        </button>
+        />
       </div>
     </div>
 
@@ -48,10 +43,11 @@
 import { createToast } from "mosha-vue-toastify";
 import { useAdmin } from "../firebase";
 import { ref, watch } from "@vue/runtime-core";
+import Button from "primevue/button";
 import QueueListTable from "../components/QueueListTable.vue";
 
 export default {
-  components: { QueueListTable },
+  components: { QueueListTable, Button },
   setup() {
     const {
       seedUsers,
@@ -133,8 +129,6 @@ export default {
               position: "top-center",
             }
           );
-
-          processing.value = false;
         });
     };
 

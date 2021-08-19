@@ -107,7 +107,6 @@ export function useQueue() {
     /*** Gets the queue items as a VueJS ref */
     const queueItems = ref([]);
 
-<<<<<<< HEAD
     // Watch the queue items
     // Also, hook for cleanup when component is unmounted
     const unsubscribe = queueNumAscending.onSnapshot(snapshot => {
@@ -115,32 +114,6 @@ export function useQueue() {
             id: doc.id,
             ...doc.data(),
         }));
-=======
-        // Save the new queue no
-        transaction.set(queueNumRef, {
-          num: newQueueNo,
-          queueTime: firebase.firestore.FieldValue.serverTimestamp(),
-          stage: 0,
-          specialCase: false,
-          timestamps: {
-            issue: firebase.firestore.FieldValue.serverTimestamp(),
-            registration: null,
-            vitals: null,
-            screening: null,
-            counseling: null,
-            vaccination: null,
-            post: null,
-          },
-          // issueTime: firebase.firestore.FieldValue.serverTimestamp(),
-          // registrationTime: null,
-          // screeningTime: null,
-          // vitalsTime: null,
-          // vaccinationTime: null,
-          // postTime: null,
-          // exitTime: null,
-        });
-      });
->>>>>>> master
     });
 
     onUnmounted(unsubscribe);
@@ -175,6 +148,7 @@ export function useQueue() {
                     num: newQueueNo,
                     queueTime: firebase.firestore.FieldValue.serverTimestamp(),
                     stage: 0,
+                    case: false,
                     timestamps: {
                         issue: firebase.firestore.FieldValue.serverTimestamp(),
                         registration: null,
@@ -279,7 +253,6 @@ export function useQueue() {
                 currentQueueId: null,
             });
 
-<<<<<<< HEAD
             return true;
         } catch (err) {
             return Promise.reject(err);
@@ -316,45 +289,6 @@ export function useQueue() {
                     .map(change => `Station ${change.doc.data().stationNum}`);
                 displayQueueNums.value = { data, changes };
             });
-=======
-      await firestore.runTransaction(async (transaction) => {
-        let query;
-
-        const perms = await permissions();
-
-        // console.log(perms);
-        // const timestamp = await firebase.firestore.Firestor
-
-        const cutoffTime = firebase.firestore.Timestamp.now();
-        // cutoffTime.seconds -= 180;
-        // console.log(cutoffTime, cutoffTime.toDate());
-
-        if (perms.specialCases.includes(auth.currentUser.uid)) {
-          // console.log("hello world");
-          query = await queueNumAscending
-            .where("queueTime", "<=", cutoffTime)
-            .where("stage", "==", stage)
-            .where("specialCase", "==", true)
-            .limit(1)
-            .get();
-          if (query.empty)
-            query = await queueNumAscending
-              .where("queueTime", "<=", cutoffTime)
-              .where("stage", "==", stage)
-              .where("specialCase", "==", false)
-              .limit(1)
-              .get();
-        } else {
-          query = await queueNumAscending
-            .where("queueTime", "<=", cutoffTime)
-            .where("stage", "==", stage)
-            .where("specialCase", "==", false)
-            .limit(1)
-            .get();
-        }
-
-        // Get the latest num with the correct stage
->>>>>>> master
 
         onUnmounted(displayUnsubscribe);
 
@@ -366,13 +300,7 @@ export function useQueue() {
         if (id == "" || id == null) return;
         let queueNum;
 
-<<<<<<< HEAD
         queueNum = await queueNumCollection.doc(id).get();
-=======
-          // Get the next queue num object
-          nextQueueNum = { id: query.docs[0].id, ...snapshot.data() };
-          console.log(snapshot.data());
->>>>>>> master
 
         if (!queueNum.exists) return false;
 
@@ -420,75 +348,7 @@ export function useQueue() {
                 })
                 .catch(err => reject(err));
         });
-<<<<<<< HEAD
     };
-=======
-        const changes = snapshot
-          .docChanges()
-          .map((change) => `Station ${change.doc.data().stationNum}`);
-        displayQueueNums.value = { data, changes };
-      });
-
-    onUnmounted(displayUnsubscribe);
-
-    return displayQueueNums;
-  };
-
-  /** Get queue number by its id */
-  const getQueueNumberById = async (id) => {
-    if (id == "" || id == null) return;
-    let queueNum;
-
-    queueNum = await queueNumCollection.doc(id).get();
-
-    if (!queueNum.exists) return false;
-
-    return { id: id, ...queueNum.data() };
-  };
-
-  /** Get the queue number assigned to the authUser's station */
-  const getQueueNumberByAuth = async (uid) => {
-    try {
-      const queueNum = await (await stationDetailsRef.doc(uid).get()).data()
-        .currentQueueId;
-
-      return Promise.resolve(queueNum);
-    } catch (err) {
-      return Promise.reject(err);
-    }
-  };
-
-  /**
-   * Sends back the number to the back of the queue
-   * @param String id - ID of the queue number
-   */
-  const unqueueNum = (id) => {
-    return new Promise((resolve, reject) => {
-      if (!id) reject("ID is not valid.");
-      if (!auth.currentUser) reject("You are not authenticated.");
-
-      queueNumCollection
-        .doc(id)
-        .get()
-        .then((docRef) => {
-          if (!docRef.exists) reject("Could not find queue number.");
-          stationDetailsRef.doc(auth.currentUser.uid).update({
-            currentQueueId: null,
-          });
-          docRef.ref
-            .update({
-              queueTime: firebase.firestore.FieldValue.serverTimestamp(),
-              stage: decrement,
-              specialCase: true,
-            })
-            .then(() => {
-              resolve("Queue number has been set back");
-            });
-        })
-        .catch((err) => reject(err));
-    });
-  };
->>>>>>> master
 
     const rejectNum = id => {
         return new Promise((resolve, reject) => {
@@ -786,7 +646,6 @@ export function useAdmin() {
         };
     };
 
-<<<<<<< HEAD
     /**
      * Resets the queue.
      *
@@ -834,68 +693,6 @@ export function useAdmin() {
         } catch (err) {
             return Promise.reject(err);
         }
-=======
-        const specialCases = [];
-
-        for (const station of stations) {
-          uids = [];
-          for (let x = 1; x <= 10; x++) {
-            const email = `station-${x}@${station}.station`;
-            const password = `${station}!stn${x}`;
-            console.log(`Creating user ${x} of station ${station}`);
-            let userCred;
-            try {
-              userCred = await auth.createUserWithEmailAndPassword(
-                email,
-                password
-              );
-              seedStatus.value = {
-                status: "success",
-                message: `Created user account for ${station} station ${x}`,
-              };
-            } catch (err) {
-              userCred = await auth.signInWithEmailAndPassword(email, password);
-              seedStatus.value = {
-                status: "success",
-                message: `Found user account for ${station} station ${x}`,
-              };
-            }
-
-            uids.push(userCred.user.uid);
-
-            if (x == 10) {
-              specialCases.push(userCred.user.uid);
-              seedStatus.value = {
-                status: "success",
-                message: "10th station found, adding to special cases",
-              };
-            }
-
-            batch.set(
-              firestore.collection("stationDetails").doc(userCred.user.uid),
-              {
-                currentQueueId: null,
-                stationNum: x,
-                stationType: station,
-              }
-            );
-          }
-
-          batch.set(firestore.collection("permissions").doc(station), {
-            ids: uids,
-          });
-        }
-
-        batch.set(firestore.collection("permissions").doc("specialCases"), {
-          ids: specialCases,
-        });
-
-        await batch.commit();
-        return Promise.resolve("Done seeding!");
-      } catch (err) {
-        return Promise.reject(err);
-      }
->>>>>>> master
     };
 
     const runTestQueries = () => {
@@ -984,72 +781,4 @@ export function useAdmin() {
         getQueueNums,
         fastTrackNum,
     };
-<<<<<<< HEAD
-=======
-  };
-
-  const getQueueNums = () => {
-    const queueNums = ref([]);
-    queueNumCollection.orderBy("num", "asc").onSnapshot((snapshot) => {
-      queueNums.value = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-    });
-    return queueNums;
-  };
-
-  const fastTrackNum = async (numId) => {
-    try {
-      const firstNum = await queueNumAscending.limit(1).get();
-      const firstQueueTime = firstNum.docs[0].data().queueTime;
-      await firestore
-        .collection("queue")
-        .doc(numId)
-        .update({
-          queueTime: firstQueueTime,
-          specialCase: true,
-        });
-      return Promise.resolve("Number moved to the front of the queue!");
-    } catch (err) {
-      return Promise.reject(err);
-    }
-  };
-
-  const markNumAsDone = async (numId) => {
-    try {
-      const num = await firestore
-        .collection("queue")
-        .doc(numId)
-        .get();
-
-      const timestamps = num.data().timestamps;
-
-      for (const station of stations) {
-        // console.log(timestamps, timestamps[station], station);
-        if (timestamps[station] === null)
-          timestamps[station] = firebase.firestore.FieldValue.serverTimestamp();
-      }
-
-      await num.ref.update({
-        timestamps,
-        stage: 12,
-        specialCase: true,
-      });
-
-      return Promise.resolve("Marked number as done!");
-    } catch (err) {
-      return Promise.reject(err);
-    }
-  };
-
-  return {
-    seedUsers,
-    resetQueue,
-    runTestQueries,
-    getQueueNums,
-    fastTrackNum,
-    markNumAsDone,
-  };
->>>>>>> master
 }
