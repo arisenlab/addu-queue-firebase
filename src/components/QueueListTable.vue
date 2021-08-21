@@ -47,7 +47,7 @@
             v-model="filterModel.value"
             @change="filterCallback"
             class="p-column-filter"
-            placeholder="Search by name"
+            placeholder="Search by number"
           />
         </template>
       </Column>
@@ -98,8 +98,6 @@
 </template>
 
 <script>
-import _ from "lodash";
-/* import { MDBPagination, MDBPageItem } from "mdb-vue-ui-kit"; */
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import InputText from "primevue/inputtext";
@@ -111,8 +109,6 @@ import { FilterMatchMode } from "primevue/api";
 export default {
   props: ["queueNumList"],
   components: {
-    /* MDBPagination,
-    MDBPageItem, */
     Button,
     DataTable,
     Column,
@@ -121,13 +117,6 @@ export default {
     Checkbox,
   },
   data: () => ({
-    stageFilter: 0,
-    ascendingNums: true,
-    queueBy: "num",
-    filterQueueNum: "",
-    currPage: 0,
-    itemsPerPage: 100,
-    current_list: [],
     filters: null,
     loading: true,
     stages: [
@@ -145,49 +134,7 @@ export default {
     this.initFilters();
   },
   mounted() {
-    this.current_list = this.queueNumList;
     this.loading = false;
-  },
-  computed: {
-    filteredList() {
-      // console.log(this.queueNumList.value);
-      // if (!this.queueNumList.value) return;
-      const filters = [
-        [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // No filter
-        [0, 1], // Registration
-        [2, 3], //  Vitals
-        [4, 5], // Counseling
-        [6, 7], // Screening
-        [8, 9], // Vaccination
-        [10, 11], // Post-Vaccination
-        [12], // Exit
-        [-1], // Exit
-      ];
-
-      const filteredStage = this.queueNumList.filter(
-        num =>
-          filters[this.stageFilter].includes(num.stage) &&
-          num.num.toString().indexOf(this.filterQueueNum) >= 0
-      );
-      let sortedStage;
-      if (this.queueBy === "queueTime") {
-        // console.log("Filtering by queue Time");
-        sortedStage = filteredStage.sort((first, second) => {
-          // console.log(first, second);
-          return first.queueTime.seconds - second.queueTime.seconds;
-        });
-      } else sortedStage = filteredStage;
-
-      if (this.ascendingNums) return sortedStage;
-      else return sortedStage.reverse();
-      // return this.queueNumList.value;
-    },
-    paginatedList() {
-      return _.chunk(this.filteredList, this.itemsPerPage);
-    },
-    pageNum() {
-      return _.range(0, this.paginatedList.length);
-    },
   },
   methods: {
     getStage(stage) {
@@ -235,19 +182,13 @@ export default {
       return stages[actualStage];
     },
     getCleanList() {
-      let new_list = [];
-      for (let queue_num of this.queueNumList) {
-        new_list.push({
-          id: queue_num.num,
-          num: queue_num.num.toString(),
-          stage: this.getStage(queue_num.stage, queue_num.timestamps),
-          case: queue_num.specialCase,
-          timein: queue_num.queueTime.toDate().toLocaleString(),
-        });
-        console.log(queue_num.num);
-      }
-
-      return new_list;
+      return this.queueNumList.map(queueNum => ({
+        id: queueNum.id,
+        num: queueNum.num.toString(),
+        stage: this.getStage(queueNum.stage),
+        case: queueNum.specialCase,
+        timein: queueNum.queueTime.toDate().toLocaleString(),
+      }));
     },
     initFilters() {
       this.filters = {
