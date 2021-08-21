@@ -52,5 +52,9 @@
         "> 1%",
         "last 2 versions",
         "not dead"
-    ]
+    ],
+    "prettier": {
+        "tabWidth": 2,
+        "trailingComma": "es5"
+    }
 }

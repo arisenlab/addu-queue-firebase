@@ -68,7 +68,7 @@ export default {
       processing.value = true;
 
       seedUserFn()
-        .then((message) => {
+        .then(message => {
           createToast(
             {
               title: "Success!",
@@ -82,7 +82,7 @@ export default {
 
           processing.value = false;
         })
-        .catch((err) => {
+        .catch(err => {
           createToast(
             {
               title: "Error",
@@ -105,7 +105,7 @@ export default {
 
       processing.value = true;
       resetQueue()
-        .then((message) => {
+        .then(message => {
           createToast(
             {
               title: "Success",
@@ -118,7 +118,7 @@ export default {
           );
           processing.value = false;
         })
-        .catch((err) => {
+        .catch(err => {
           createToast(
             {
               title: "Error",
@@ -135,7 +135,7 @@ export default {
     const testQueries = () => {
       processing.value = true;
       testQuery()
-        .then((message) => {
+        .then(message => {
           createToast(
             {
               title: "Success",
@@ -149,7 +149,7 @@ export default {
 
           processing.value = false;
         })
-        .catch((err) => {
+        .catch(err => {
           createToast(
             {
               title: "Error",
@@ -190,9 +190,7 @@ export default {
 
       processing.value = true;
 
-      const queueNumItem = queueNumList.value.find(
-        (num) => num.num === queueNum
-      );
+      const queueNumItem = queueNumList.value.find(num => num.num === queueNum);
 
       if (queueNumItem === undefined) {
         createToast(
@@ -210,7 +208,7 @@ export default {
       }
 
       fastTrackNum(queueNumItem.id)
-        .then((message) => {
+        .then(message => {
           createToast(
             {
               title: "Success",
@@ -223,7 +221,7 @@ export default {
           );
           processing.value = false;
         })
-        .catch((err) => {
+        .catch(err => {
           createToast(
             {
               title: "Error",
@@ -265,9 +263,7 @@ export default {
 
       processing.value = true;
 
-      const queueNumItem = queueNumList.value.find(
-        (num) => num.num === queueNum
-      );
+      const queueNumItem = queueNumList.value.find(num => num.num === queueNum);
 
       if (queueNumItem === undefined) {
         createToast(
@@ -285,7 +281,7 @@ export default {
       }
 
       markNumAsDone(queueNumItem.id)
-        .then((message) => {
+        .then(message => {
           createToast(
             {
               title: "Success",
@@ -298,7 +294,7 @@ export default {
           );
           processing.value = false;
         })
-        .catch((err) => {
+        .catch(err => {
           createToast(
             {
               title: "Error",
@@ -317,7 +313,7 @@ export default {
 
     watch(
       () => queryStatus.value,
-      (newVal) => {
+      newVal => {
         createToast(
           {
             title: "Success",
@@ -333,7 +329,7 @@ export default {
 
     watch(
       () => seedStatus.value,
-      (newVal) => {
+      newVal => {
         createToast(
           {
             title: "Success",
@@ -348,7 +344,7 @@ export default {
       }
     );
 
-    const getStage = (stage) => {
+    const getStage = stage => {
       const actualStage = stage + 1;
       const stages = [
         "Rejected",

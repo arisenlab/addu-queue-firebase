@@ -109,7 +109,7 @@ const router = createRouter({
 // });
 
 router.beforeEach((to, from, next) => {
-  permissions().then((userPermissions) => {
+  permissions().then(userPermissions => {
     // console.log(userPermissions);
     if (to.meta.authRequired) {
       if (isLogin.value)
