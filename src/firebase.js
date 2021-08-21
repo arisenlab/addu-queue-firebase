@@ -188,11 +188,40 @@ export function useQueue() {
       var nextQueueNum;
 
       await firestore.runTransaction(async transaction => {
-        // Get the latest num with the correct stage
-        let query = await queueNumAscending
-          .where("stage", "==", stage)
-          .limit(1)
-          .get();
+        let query;
+
+        const perms = await permissions();
+
+        // console.log(perms);
+        // const timestamp = await firebase.firestore.Firestor
+
+        const cutoffTime = firebase.firestore.Timestamp.now();
+        cutoffTime.seconds -= 180;
+        // console.log(cutoffTime, cutoffTime.toDate());
+
+        if (perms.specialCases.includes(auth.currentUser.uid)) {
+          // console.log("hello world");
+          query = await queueNumAscending
+            .where("queueTime", "<=", cutoffTime)
+            .where("stage", "==", stage)
+            .where("specialCase", "==", true)
+            .limit(1)
+            .get();
+          if (query.empty)
+            query = await queueNumAscending
+              .where("queueTime", "<=", cutoffTime)
+              .where("stage", "==", stage)
+              .where("specialCase", "==", false)
+              .limit(1)
+              .get();
+        } else {
+          query = await queueNumAscending
+            .where("queueTime", "<=", cutoffTime)
+            .where("stage", "==", stage)
+            .where("specialCase", "==", false)
+            .limit(1)
+            .get();
+        }
 
         // If query is empty AKA No one w/ the stage is found,
         // Throw an error
@@ -402,13 +431,38 @@ export function useStationControl(stage) {
       .runTransaction(transaction => {
         transCount++;
         console.log("Trying transaction...", transCount);
-        return transaction.get(controlCounterRef).then(async counter => {
-          console.log(counter.data());
+        return transaction.get(controlCounterRef).then(async () => {
+          const perms = await permissions();
 
-          let query = await queueNumAscending
-            .where("stage", "==", stage)
-            .limit(1)
-            .get();
+          const cutoffTime = firebase.firestore.Timestamp.now();
+          cutoffTime.seconds -= 5;
+          // console.log(cutoffTime, cutoffTime.toDate());
+          let query;
+
+          if (perms.specialCases.includes(auth.currentUser.uid)) {
+            console.log("Special Case Station");
+            query = await queueNumAscending
+              .where("queueTime", "<=", cutoffTime)
+              .where("stage", "==", stage)
+              .where("specialCase", "==", true)
+              .limit(1)
+              .get();
+            if (query.empty)
+              query = await queueNumAscending
+                .where("queueTime", "<=", cutoffTime)
+                .where("stage", "==", stage)
+                .where("specialCase", "==", false)
+                .limit(1)
+                .get();
+          } else {
+            console.log("Normal Station");
+            query = await queueNumAscending
+              .where("queueTime", "<=", cutoffTime)
+              .where("stage", "==", stage)
+              .where("specialCase", "==", false)
+              .limit(1)
+              .get();
+          }
 
           if (query.empty)
             return Promise.reject("No one is in the waiting list.");
