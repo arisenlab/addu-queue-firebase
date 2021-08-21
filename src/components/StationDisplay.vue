@@ -1,28 +1,4 @@
-<!-- THIS COMPONENT IS USED TO DISPLAY ALL NUMBERS
-THAT ARE CURRENTLY BEING SERVED IN THE STATION -->
-
 <template>
-  <!-- <div class="row row-cols-10 g-1">
-    <div class="col" v-for="station in reversedNums" :key="station.station">
-      <div
-        class="card c-main"
-        :class="{
-          'bg-warning': newNums[station.station],
-          'text-white': newNums[station.station],
-        }"
-      >
-        <div class="card-body text-center">
-          <div class="card-title">
-            {{ station.station.split(" ")[0] }}<br />
-            <h1>{{ station.station.split(" ")[1] }}</h1>
-          </div>
-          <div class="card-text">
-            <h1 class="display-4">{{ station.currentNum || "Free" }}</h1>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div> -->
   <div class="p-grid">
     <div class="p-col" v-for="station in reversedNums" :key="station.station">
       <Card

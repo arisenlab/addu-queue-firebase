@@ -142,7 +142,7 @@ export default {
         const rejectedStageInd = stage * -1;
         const stages = [
           "Something went wrong",
-          "Rejected at Registration",
+          // "Rejected at Registration",
           // "Rejected at Registration",
           "Rejected at Registration",
           "Rejected at Vitals",

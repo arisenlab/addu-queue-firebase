@@ -10,6 +10,6 @@ import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
 
 createApp(App)
-    .use(router)
-    .use(PrimeVue)
-    .mount("#app");
+  .use(router)
+  .use(PrimeVue, { ripple: true })
+  .mount("#app");
