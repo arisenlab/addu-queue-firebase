@@ -87,7 +87,7 @@
 <script>
 import { watch } from "@vue/runtime-core";
 import { ref } from "vue";
-import { useQueue, useAuth, useStationControl } from "../firebase";
+import { useAuth, useStationControl } from "../firebase";
 import QueueNumberCard from "./QueueNumberCard";
 import Card from "primevue/card";
 import Button from "primevue/button";
@@ -108,28 +108,20 @@ export default {
   },
   setup(props) {
     // Hooks
+    const { user } = useAuth();
     const {
-      //   callForNextNum,
+      callForNextNum,
+      rejectNum,
       finishCurrentNum,
       unqueueNum,
       getQueueNumberByAuth,
-      rejectNum,
-    } = useQueue();
-    const { user } = useAuth();
-    const { callForNextNum } = useStationControl(props.stageId);
+    } = useStationControl(props.stageId);
 
     // Data
     const currentlyServing = ref(null);
     const processing = ref(false);
-    // const mapStage = {
-    //   registration: 0,
-    //   screening: 2,
-    //   vitals: 4,
-    //   vaccination: 6,
-    // };
 
     // Methods
-
     // Finish current queue number
     const finishCurrent = async () => {
       processing.value = true;

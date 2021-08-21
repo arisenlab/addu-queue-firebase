@@ -20,7 +20,6 @@ const stations = [
 ];
 
 /** Contains the user ids of the auth users and their permissions
- *
  * Warning: No security whatsoever.
  */
 const permissions = () => {
@@ -109,7 +108,6 @@ const stationDetailsRef = firestore.collection("stationDetails");
 const decrement = firebase.firestore.FieldValue.increment(-1);
 
 export function useQueue() {
-  /*** Gets the queue items as a VueJS ref */
   const queueItems = ref([]);
 
   // Watch the queue items
@@ -153,7 +151,7 @@ export function useQueue() {
           num: newQueueNo,
           queueTime: firebase.firestore.FieldValue.serverTimestamp(),
           stage: 0,
-          case: false,
+          specialCase: false,
           timestamps: {
             issue: firebase.firestore.FieldValue.serverTimestamp(),
             registration: null,
@@ -163,131 +161,11 @@ export function useQueue() {
             vaccination: null,
             post: null,
           },
-          // issueTime: firebase.firestore.FieldValue.serverTimestamp(),
-          // registrationTime: null,
-          // screeningTime: null,
-          // vitalsTime: null,
-          // vaccinationTime: null,
-          // postTime: null,
-          // exitTime: null,
         });
       });
     });
 
     return newQueueNo;
-  };
-
-  // Function Definition for Station Control
-  const callForNextNum = async stage => {
-    try {
-      const station = stations[stage / 2];
-
-      // Authenticate the user
-      if (!auth.currentUser) throw "You are not authenticated.";
-
-      var nextQueueNum;
-
-      await firestore.runTransaction(async transaction => {
-        let query;
-
-        const perms = await permissions();
-
-        // console.log(perms);
-        // const timestamp = await firebase.firestore.Firestor
-
-        const cutoffTime = firebase.firestore.Timestamp.now();
-        cutoffTime.seconds -= 180;
-        // console.log(cutoffTime, cutoffTime.toDate());
-
-        if (perms.specialCases.includes(auth.currentUser.uid)) {
-          // console.log("hello world");
-          query = await queueNumAscending
-            .where("queueTime", "<=", cutoffTime)
-            .where("stage", "==", stage)
-            .where("specialCase", "==", true)
-            .limit(1)
-            .get();
-          if (query.empty)
-            query = await queueNumAscending
-              .where("queueTime", "<=", cutoffTime)
-              .where("stage", "==", stage)
-              .where("specialCase", "==", false)
-              .limit(1)
-              .get();
-        } else {
-          query = await queueNumAscending
-            .where("queueTime", "<=", cutoffTime)
-            .where("stage", "==", stage)
-            .where("specialCase", "==", false)
-            .limit(1)
-            .get();
-        }
-
-        // If query is empty AKA No one w/ the stage is found,
-        // Throw an error
-        if (query.empty) throw "No one is in the waiting list.";
-
-        const doc = query.docs[0].ref;
-
-        // console.log("before transaction", query, doc);
-        // Finally do the transaction.
-        return transaction.get(doc).then(snapshot => {
-          // More error to throw
-          if (!snapshot) throw "Document does not exist";
-
-          // Get the next queue num object
-          nextQueueNum = { id: query.docs[0].id, ...snapshot.data() };
-
-          // Increment the stage
-          // const nextStage = snapshot.data().stage + 1;
-
-          // Update the timestamps
-          const newData = snapshot.data();
-          newData.timestamps[
-            station
-          ] = firebase.firestore.FieldValue.serverTimestamp();
-          newData.stage = newData.stage + 1;
-
-          // Update the table
-          transaction.update(doc, newData);
-          transaction.update(stationDetailsRef.doc(auth.currentUser.uid), {
-            currentQueueId: { id: snapshot.id, ...newData },
-          });
-        });
-      });
-    } catch (err) {
-      // Return the error
-      console.error(err);
-      return Promise.reject(err);
-    }
-
-    return nextQueueNum;
-  };
-
-  const finishCurrentNum = async (queueId, station = "registration") => {
-    try {
-      // Authenticate the user
-      if (!auth.currentUser) throw "You are not authenticated.";
-
-      // Check if queue Id is invalid
-      if (queueId === null || queueId === undefined)
-        throw "You have returned an invalid queue number";
-
-      // Update the queue item
-      await queueNumCollection.doc(queueId).update({
-        stage: firebase.firestore.FieldValue.increment(1), // Comment this out if you're going to use monitoring
-        [`timestamps.${station}`]: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-
-      // Update the station details
-      await stationDetailsRef.doc(auth.currentUser.uid).update({
-        currentQueueId: null,
-      });
-
-      return true;
-    } catch (err) {
-      return Promise.reject(err);
-    }
   };
 
   /**
@@ -325,95 +203,10 @@ export function useQueue() {
     return displayQueueNums;
   };
 
-  /** Get queue number by its id */
-  const getQueueNumberById = async id => {
-    if (id == "" || id == null) return;
-    let queueNum;
-
-    queueNum = await queueNumCollection.doc(id).get();
-
-    if (!queueNum.exists) return false;
-
-    return { id: id, ...queueNum.data() };
-  };
-
-  /** Get the queue number assigned to the authUser's station */
-  const getQueueNumberByAuth = async uid => {
-    try {
-      const queueNum = await (await stationDetailsRef.doc(uid).get()).data()
-        .currentQueueId;
-
-      return Promise.resolve(queueNum);
-    } catch (err) {
-      return Promise.reject(err);
-    }
-  };
-
-  /**
-   * Sends back the number to the back of the queue
-   * @param String id - ID of the queue number
-   */
-  const unqueueNum = id => {
-    return new Promise((resolve, reject) => {
-      if (!id) reject("ID is not valid.");
-      if (!auth.currentUser) reject("You are not authenticated.");
-
-      queueNumCollection
-        .doc(id)
-        .get()
-        .then(docRef => {
-          if (!docRef.exists) reject("Could not find queue number.");
-          stationDetailsRef.doc(auth.currentUser.uid).update({
-            currentQueueId: null,
-          });
-          docRef.ref
-            .update({
-              queueTime: firebase.firestore.FieldValue.serverTimestamp(),
-              stage: decrement,
-            })
-            .then(() => {
-              resolve("Queue number has been set back");
-            });
-        })
-        .catch(err => reject(err));
-    });
-  };
-
-  const rejectNum = id => {
-    return new Promise((resolve, reject) => {
-      if (!id) reject("ID is not valid.");
-      if (!auth.currentUser) reject("You are not authenticated.");
-
-      queueNumCollection
-        .doc(id)
-        .get()
-        .then(docRef => {
-          if (!docRef.exists)
-            if (!docRef.exists) reject("Could not find queue number.");
-          stationDetailsRef.doc(auth.currentUser.uid).update({
-            currentQueueId: null,
-          });
-          docRef.ref
-            .update({
-              stage: -1,
-            })
-            .then(() => {
-              resolve("Queue number has been rejected");
-            });
-        });
-    });
-  };
-
   return {
     queueItems,
     issueQueueNum,
-    callForNextNum,
-    finishCurrentNum,
     stationDisplayQueueNums,
-    getQueueNumberById,
-    unqueueNum,
-    rejectNum,
-    getQueueNumberByAuth,
   };
 }
 
@@ -477,18 +270,20 @@ export function useStationControl(stage) {
 
           transaction.update(query.docs[0].ref, queryData);
           transaction.update(stationDetailsRef.doc(auth.currentUser.uid), {
-            currentQueueId: { id: query.docs[0].id, ...queryData },
+            currentQueueId: {
+              id: query.docs[0].id,
+              ...queryData,
+            },
           });
           transaction.update(controlCounterRef, {
             count: firebase.firestore.FieldValue.increment(1),
           });
           console.log("Returning query data...");
-          return { id: query.docs[0].id, ...queryData };
+          nextQueueNum = {
+            id: query.docs[0].id,
+            ...queryData,
+          };
         });
-      })
-      .then(nextNum => {
-        nextQueueNum = nextNum;
-        console.log("THE QUEUE NUM IS", nextQueueNum);
       })
       .catch(err => {
         return Promise.reject(err);
@@ -497,7 +292,11 @@ export function useStationControl(stage) {
     return nextQueueNum;
   };
 
-  const finishCurrentNum = async (queueId, station = "registration") => {
+  /**
+   * Sends the current patient to the next stage
+   * @param {Number} queueId
+   */
+  const finishCurrentNum = async queueId => {
     try {
       // Authenticate the user
       if (!auth.currentUser) throw "You are not authenticated.";
@@ -523,9 +322,80 @@ export function useStationControl(stage) {
     }
   };
 
+  /**
+   * Sends back the number to the back of the queue
+   * @param String id - ID of the queue number
+   */
+  const unqueueNum = id => {
+    return new Promise((resolve, reject) => {
+      if (!id) reject("ID is not valid.");
+      if (!auth.currentUser) reject("You are not authenticated.");
+
+      queueNumCollection
+        .doc(id)
+        .get()
+        .then(docRef => {
+          if (!docRef.exists) reject("Could not find queue number.");
+          stationDetailsRef.doc(auth.currentUser.uid).update({
+            currentQueueId: null,
+          });
+          docRef.ref
+            .update({
+              queueTime: firebase.firestore.FieldValue.serverTimestamp(),
+              specialCase: true,
+              stage: decrement,
+            })
+            .then(() => {
+              resolve("Queue number has been set back");
+            });
+        })
+        .catch(err => reject(err));
+    });
+  };
+
+  const rejectNum = id => {
+    return new Promise((resolve, reject) => {
+      if (!id) reject("ID is not valid.");
+      if (!auth.currentUser) reject("You are not authenticated.");
+
+      queueNumCollection
+        .doc(id)
+        .get()
+        .then(docRef => {
+          if (!docRef.exists)
+            if (!docRef.exists) reject("Could not find queue number.");
+          stationDetailsRef.doc(auth.currentUser.uid).update({
+            currentQueueId: null,
+          });
+          docRef.ref
+            .update({
+              stage: -docRef.data().stage,
+            })
+            .then(() => {
+              resolve("Queue number has been rejected");
+            });
+        });
+    });
+  };
+
+  /** Get the queue number assigned to the authUser's station */
+  const getQueueNumberByAuth = async uid => {
+    try {
+      const queueNum = await (await stationDetailsRef.doc(uid).get()).data()
+        .currentQueueId;
+
+      return Promise.resolve(queueNum);
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  };
+
   return {
     callForNextNum,
     finishCurrentNum,
+    unqueueNum,
+    rejectNum,
+    getQueueNumberByAuth,
   };
 }
 
@@ -894,6 +764,7 @@ export function useAdmin() {
         .collection("queue")
         .doc(numId)
         .update({
+          specialCase: true,
           queueTime: firstQueueTime,
         });
       return Promise.resolve("Number moved to the front of the queue!");
