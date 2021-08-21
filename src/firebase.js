@@ -228,7 +228,7 @@ export function useStationControl(stage) {
           const perms = await permissions();
 
           const cutoffTime = firebase.firestore.Timestamp.now();
-          cutoffTime.seconds -= 5;
+          cutoffTime.seconds -= 300;
           // console.log(cutoffTime, cutoffTime.toDate());
           let query;
 
